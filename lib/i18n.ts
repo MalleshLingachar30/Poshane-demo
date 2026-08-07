@@ -79,6 +79,11 @@ export const t = {
     en: "Sign in at a higher level to reach it.",
     kn: "ಅದನ್ನು ತಲುಪಲು ಮೇಲಿನ ಹಂತದಲ್ಲಿ ಪ್ರವೇಶಿಸಿ.",
   },
+  tagBatchNote: {
+    en: "Tags are issued after approval and printed per taluk, for the team going to those sites. Filter to a batch before printing.",
+    kn: "ಅನುಮೋದನೆಯ ನಂತರ ಟ್ಯಾಗ್‌ಗಳನ್ನು ನೀಡಲಾಗುತ್ತದೆ ಮತ್ತು ಆಯಾ ಸ್ಥಳಗಳಿಗೆ ಹೋಗುವ ತಂಡಕ್ಕಾಗಿ ತಾಲ್ಲೂಕುವಾರು ಮುದ್ರಿಸಲಾಗುತ್ತದೆ. ಮುದ್ರಿಸುವ ಮೊದಲು ಬ್ಯಾಚ್ ಆಯ್ಕೆಮಾಡಿ.",
+  },
+  tagsInBatch: { en: "tags in this batch", kn: "ಈ ಬ್ಯಾಚ್‌ನಲ್ಲಿ ಟ್ಯಾಗ್‌ಗಳು" },
   filterDistrict: { en: "District", kn: "ಜಿಲ್ಲೆ" },
   filterTaluk: { en: "Taluk", kn: "ತಾಲ್ಲೂಕು" },
   filterStatus: { en: "Status", kn: "ಸ್ಥಿತಿ" },
