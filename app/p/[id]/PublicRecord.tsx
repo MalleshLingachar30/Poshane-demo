@@ -1,0 +1,111 @@
+"use client";
+
+import Link from "next/link";
+import { useDemo } from "@/components/DemoContext";
+import ParcelMap from "@/components/ParcelMap";
+import EvidencePanel from "@/components/EvidencePanel";
+import { tr } from "@/lib/i18n";
+import type { Parcel } from "@/lib/data";
+
+export default function PublicRecord({ parcel: p }: { parcel: Parcel }) {
+  const { lang } = useDemo();
+  const en = lang === "en";
+
+  return (
+    <main>
+      <Link href="/" className="mono" style={{ textDecoration: "none" }}>
+        ← {tr("back", lang)}
+      </Link>
+
+      <div className="card" style={{ marginTop: 14 }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            gap: 12,
+            borderBottom: "1px solid var(--line)",
+            paddingBottom: 14,
+          }}
+        >
+          <div>
+            <div className="mono">{p.id}</div>
+            <h1
+              style={{
+                fontFamily: "var(--serif)",
+                fontSize: 22,
+                fontWeight: 600,
+                margin: "2px 0",
+              }}
+            >
+              {en
+                ? `${p.taluk} ${tr("taluk", lang)}, ${p.district}`
+                : `${p.talukKn} ${tr("taluk", lang)}, ${p.districtKn}`}
+            </h1>
+            <div style={{ fontSize: 13.5, color: "var(--muted)" }}>
+              {p.areaHa.toFixed(2)} {tr("ha", lang)} · {tr("landType", lang)} ·{" "}
+              {tr("plantedOn", lang)} {p.plantedOn}
+            </div>
+          </div>
+          <span className={`pill ${p.status}`}>
+            {p.status === "active"
+              ? tr("statusActive", lang)
+              : p.status === "flagged"
+                ? tr("statusFlagged", lang)
+                : tr("statusRectification", lang)}
+          </span>
+        </div>
+
+        <div className="metrics">
+          <div className="metric">
+            <div className="k">{tr("survivalLast", lang)}</div>
+            <div className="v">{p.survival}%</div>
+            <div className="n">
+              {tr("countedOn", lang)} {p.survivalCountedOn}
+            </div>
+          </div>
+          <div className="metric">
+            <div className="k">{tr("saplingsPlanted", lang)}</div>
+            <div className="v">{p.saplings.toLocaleString("en-IN")}</div>
+            <div className="n">
+              {p.speciesCount} {tr("species", lang)} · {tr("zone", lang)} {p.zone}
+            </div>
+          </div>
+          <div className="metric">
+            <div className="k">{tr("nextCensus", lang)}</div>
+            <div className="v">{p.nextCensus}</div>
+            <div className="n">{tr("annualCycle", lang)}</div>
+          </div>
+        </div>
+
+        <div className="split">
+          <div>
+            <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 10 }}>
+              {tr("evidence", lang)}
+            </p>
+            <div className="timeline">
+              {p.events.map((e, i) => (
+                <div key={i} className={`item ${e.kind}`}>
+                  <div className="l">{en ? e.labelEn : e.labelKn}</div>
+                  <div className="m">
+                    {e.date} · {en ? e.metaEn : e.metaKn}
+                  </div>
+                  {e.publicVisible && <EvidencePanel event={e} visible />}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <ParcelMap polygon={p.polygon} height={140} />
+            <p style={{ fontSize: 12, color: "var(--muted)", marginTop: 8, lineHeight: 1.55 }}>
+              {tr("boundaryNote", lang)}
+            </p>
+          </div>
+        </div>
+
+        <p className="note">{tr("satelliteNote", lang)}</p>
+      </div>
+    </main>
+  );
+}
