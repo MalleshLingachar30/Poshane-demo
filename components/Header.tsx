@@ -12,6 +12,7 @@ const NAV = [
   { href: "/console/submit", key: "submitParcel" as const },
   { href: "/console/state", key: "stateView" as const },
   { href: "/tags", key: "tags" as const },
+  { href: "/intake", key: "landIntake" as const },
 ];
 
 export default function Header() {
@@ -19,6 +20,7 @@ export default function Header() {
   const path = usePathname();
   const en = lang === "en";
   const isPublic = path === "/" || path.startsWith("/p/") || path === "/tags";
+  const isIntake = path.startsWith("/intake");
   const nav = NAV.filter(
     (n) => n.href !== "/console/state" || role.level === "state",
   );
@@ -32,7 +34,7 @@ export default function Header() {
         </Link>
 
         <div className="header-controls">
-        {isPublic ? (
+        {isIntake ? null : isPublic ? (
           <span className="public-badge">{tr("publicView", lang)}</span>
         ) : (
           <label className="role-picker">
