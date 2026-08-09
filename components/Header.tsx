@@ -29,8 +29,20 @@ export default function Header() {
     <header className="header">
       <div className="header-top">
         <Link href="/" className="brand">
-          <span className="brand-mark">{tr("brand", lang)}</span>
-          <span className="brand-sub">{tr("brandSub", lang)}</span>
+          {/* Programme mark. Served from the main Poshane site; drop a copy at
+              /public/poshane-mark.png and change src to "/poshane-mark.png"
+              to make the demo fully self-contained. */}
+          <img
+            className="brand-logo"
+            src="https://poshane.vercel.app/poshane-mark.png"
+            alt=""
+            width={44}
+            height={44}
+          />
+          <span className="brand-text">
+            <span className="brand-mark">{tr("brand", lang)}</span>
+            <span className="brand-sub">{tr("brandSub", lang)}</span>
+          </span>
         </Link>
 
         <div className="header-controls">
