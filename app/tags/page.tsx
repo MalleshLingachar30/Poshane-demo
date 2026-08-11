@@ -4,10 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { useDemo } from "@/components/DemoContext";
 import { tr } from "@/lib/i18n";
-import { ALL_PARCELS } from "@/lib/data";
+import { scopedParcels } from "@/lib/data";
 
 export default function Tags() {
-  const { lang } = useDemo();
+  const { lang, role } = useDemo();
   const en = lang === "en";
   const [origin, setOrigin] = useState("");
   const [district, setDistrict] = useState("");
@@ -15,27 +15,31 @@ export default function Tags() {
 
   useEffect(() => setOrigin(window.location.origin), []);
 
+  // Issuing tags is a departmental task, so the sheet is scoped like every other
+  // departmental task: an officer prints for their own posting, never beyond it.
+  const inScope = useMemo(() => scopedParcels(role), [role]);
+
   const districts = useMemo(() => {
     const m = new Map<string, string>();
-    ALL_PARCELS.forEach((p) => m.set(p.district, p.districtKn));
+    inScope.forEach((p) => m.set(p.district, p.districtKn));
     return [...m.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-  }, []);
+  }, [inScope]);
 
   const taluks = useMemo(() => {
     const m = new Map<string, string>();
-    ALL_PARCELS.filter((p) => !district || p.district === district).forEach((p) =>
+    inScope.filter((p) => !district || p.district === district).forEach((p) =>
       m.set(p.taluk, p.talukKn),
     );
     return [...m.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-  }, [district]);
+  }, [inScope, district]);
 
   const list = useMemo(
     () =>
-      ALL_PARCELS.filter(
+      inScope.filter(
         (p) =>
           (!district || p.district === district) && (!taluk || p.taluk === taluk),
       ),
-    [district, taluk],
+    [inScope, district, taluk],
   );
 
   return (
@@ -45,36 +49,50 @@ export default function Tags() {
         <p className="lede">{tr("tagBatchNote", lang)}</p>
 
         <div className="filters">
-          <label>
-            <span>{tr("filterDistrict", lang)}</span>
-            <select
-              className="role"
-              value={district}
-              onChange={(e) => {
-                setDistrict(e.target.value);
-                setTaluk("");
-              }}
-            >
-              <option value="">{tr("allDistricts", lang)}</option>
-              {districts.map(([name, kn]) => (
-                <option key={name} value={name}>
-                  {en ? name : kn}
-                </option>
-              ))}
-            </select>
-          </label>
+          {role.level === "state" ? (
+            <label>
+              <span>{tr("filterDistrict", lang)}</span>
+              <select
+                className="role"
+                value={district}
+                onChange={(e) => {
+                  setDistrict(e.target.value);
+                  setTaluk("");
+                }}
+              >
+                <option value="">{tr("allDistricts", lang)}</option>
+                {districts.map(([name, kn]) => (
+                  <option key={name} value={name}>
+                    {en ? name : kn}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : (
+            <span className="filter-fixed">
+              {tr("filterDistrict", lang)}: <strong>{role.district}</strong>{" "}
+              {tr("fromPosting", lang)}
+            </span>
+          )}
 
-          <label>
-            <span>{tr("filterTaluk", lang)}</span>
-            <select className="role" value={taluk} onChange={(e) => setTaluk(e.target.value)}>
-              <option value="">{tr("allTaluks", lang)}</option>
-              {taluks.map(([name, kn]) => (
-                <option key={name} value={name}>
-                  {en ? name : kn}
-                </option>
-              ))}
-            </select>
-          </label>
+          {role.level !== "taluk" ? (
+            <label>
+              <span>{tr("filterTaluk", lang)}</span>
+              <select className="role" value={taluk} onChange={(e) => setTaluk(e.target.value)}>
+                <option value="">{tr("allTaluks", lang)}</option>
+                {taluks.map(([name, kn]) => (
+                  <option key={name} value={name}>
+                    {en ? name : kn}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : (
+            <span className="filter-fixed">
+              {tr("filterTaluk", lang)}: <strong>{role.taluk}</strong>{" "}
+              {tr("fromPosting", lang)}
+            </span>
+          )}
 
           <span className="filter-count">
             {list.length} {tr("tagsInBatch", lang)}

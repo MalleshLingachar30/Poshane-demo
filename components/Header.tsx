@@ -19,7 +19,7 @@ export default function Header() {
   const { lang, setLang, role, setRoleKey } = useDemo();
   const path = usePathname();
   const en = lang === "en";
-  const isPublic = path === "/" || path.startsWith("/p/") || path === "/tags";
+  const isPublic = path === "/" || path.startsWith("/p/");
   const isIntake = path.startsWith("/intake");
   const nav = NAV.filter(
     (n) => n.href !== "/console/state" || role.level === "state",

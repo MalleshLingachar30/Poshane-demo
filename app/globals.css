@@ -578,3 +578,9 @@ select.role {
 @media print {
   .brand-logo { width: 34px; height: 34px; }
 }
+
+.filter-fixed {
+  font-size: 12px;
+  color: var(--muted);
+}
+.filter-fixed strong { color: var(--ink); }
