@@ -584,3 +584,65 @@ select.role {
   color: var(--muted);
 }
 .filter-fixed strong { color: var(--ink); }
+
+/* ---------- cohorts ---------- */
+.cohorts { display: grid; gap: 14px; margin-bottom: 18px; }
+.cohort {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.cohort .season {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--navy);
+  font-weight: 700;
+  margin-bottom: 9px;
+}
+.cohort .bar { display: flex; height: 26px; border-radius: 5px; overflow: hidden; }
+.cohort .seg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11.5px;
+  color: #fff;
+  min-width: 26px;
+}
+.cohort .seg.planted { background: var(--green); }
+.cohort .seg.approved { background: var(--gold); }
+.cohort .seg.verifying { background: var(--navy); }
+.cohort .seg.offered { background: #9AA2AE; }
+.cohort .legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 9px;
+  font-size: 12px;
+  color: var(--ink);
+}
+.cohort .legend span { display: flex; align-items: center; gap: 6px; }
+.cohort .legend span.muted { color: var(--muted); }
+.cohort .legend i { width: 9px; height: 9px; border-radius: 2px; display: block; }
+.cohort .legend i.planted { background: var(--green); }
+.cohort .legend i.approved { background: var(--gold); }
+.cohort .legend i.verifying { background: var(--navy); }
+.cohort .legend i.offered { background: #9AA2AE; }
+
+.provenance {
+  background: var(--green-tint);
+  border-left: 3px solid var(--green);
+  padding: 14px 18px;
+  margin-top: 18px;
+}
+.provenance .h {
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--green);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.provenance ol { margin: 0 0 0 18px; padding: 0; }
+.provenance li { font-size: 12.5px; line-height: 1.75; }

@@ -104,6 +104,28 @@ export default function PublicRecord({ parcel: p }: { parcel: Parcel }) {
           </div>
         </div>
 
+        {p.offerRef && (
+          <div className="provenance">
+            <div className="h">{tr("howItGotHere", lang)}</div>
+            <ol>
+              <li>
+                <b>{en ? p.deptEn : p.deptKn}</b> {tr("provOffered", lang)}
+                <span className="mono"> {p.offerRef}</span>
+              </li>
+              <li>
+                {tr("provWalked", lang)} <b>{en ? p.verifiedByEn : p.verifiedByKn}</b>,
+                {" "}{tr("provIssued", lang)} <span className="mono">{p.id}</span>
+              </li>
+              <li>
+                {tr("provPlan", lang)} {p.planApprovedOn}
+              </li>
+              <li>
+                {tr("provPlanted", lang)} {p.plantedOn} · {p.season}
+              </li>
+            </ol>
+          </div>
+        )}
+
         <p className="note">{tr("satelliteNote", lang)}</p>
       </div>
     </main>

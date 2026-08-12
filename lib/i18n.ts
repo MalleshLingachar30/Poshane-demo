@@ -129,6 +129,12 @@ export const t = {
     kn: "ರಾಜ್ಯ ಮಟ್ಟದ ಒಟ್ಟು ನೋಟವನ್ನು ಎಲ್ಲಾ ಜಿಲ್ಲೆಗಳಿಂದ ರೂಪಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ಅದು ರಾಜ್ಯ ನಿಯಂತ್ರಣಕ್ಕೆ ಮಾತ್ರ ಲಭ್ಯ. ಜಿಲ್ಲಾ ಅಥವಾ ತಾಲ್ಲೂಕು ಅಧಿಕಾರಿಗೆ ತಮ್ಮ ವ್ಯಾಪ್ತಿಯ ಒಟ್ಟು ನೋಟ ನಿಯಂತ್ರಣ ಫಲಕದಲ್ಲಿ ಕಾಣಿಸುತ್ತದೆ.",
   },
   publicView: { en: "Open to anyone — no sign-in", kn: "ಎಲ್ಲರಿಗೂ ಮುಕ್ತ — ಪ್ರವೇಶ ಅಗತ್ಯವಿಲ್ಲ" },
+  howItGotHere: { en: "How this parcel came to be planted", kn: "ಈ ಜಮೀನು ಹೇಗೆ ನೆಡಲ್ಪಟ್ಟಿತು" },
+  provOffered: { en: "offered this land, reference", kn: "ಈ ಭೂಮಿಯನ್ನು ನೀಡಿತು, ಉಲ್ಲೇಖ" },
+  provWalked: { en: "The boundary was walked by", kn: "ಗಡಿಯನ್ನು ನಡೆದವರು" },
+  provIssued: { en: "and a Location ID was issued —", kn: "ಮತ್ತು ಲೊಕೇಶನ್ ಐಡಿ ನೀಡಲಾಯಿತು —" },
+  provPlan: { en: "IAFT approved the species plan on", kn: "ಐಎಎಫ್‌ಟಿ ಪ್ರಭೇದ ಯೋಜನೆಯನ್ನು ಅನುಮೋದಿಸಿದ ದಿನಾಂಕ" },
+  provPlanted: { en: "Planted on", kn: "ನೆಟ್ಟ ದಿನಾಂಕ" },
   publicNote: {
     en: "Anyone may open these records. No login, no application, no account — a tag scan is the whole journey.",
     kn: "ಈ ದಾಖಲೆಗಳನ್ನು ಯಾರು ಬೇಕಾದರೂ ತೆರೆಯಬಹುದು. ಲಾಗಿನ್ ಇಲ್ಲ, ಆ್ಯಪ್ ಇಲ್ಲ, ಖಾತೆ ಇಲ್ಲ — ಟ್ಯಾಗ್ ಸ್ಕ್ಯಾನ್ ಮಾಡಿದರೆ ಸಾಕು.",

@@ -129,6 +129,7 @@ export type DemandLine = {
   planned: number;
   withMargin: number;
   parcels: number;
+  taluks: string[];        // where the demand came from, so it can be raised nearby
 };
 
 export type DistrictDemand = {
@@ -160,8 +161,12 @@ export function nurseryDemand(plans: Ssp[], marginPct: number): DistrictDemand[]
         if (cur) {
           cur.planned += l.count;
           cur.parcels += 1;
+          if (!cur.taluks.includes(p.taluk)) cur.taluks.push(p.taluk);
         } else {
-          acc.set(key, { species: l.species, bag: m.bag, planned: l.count, withMargin: 0, parcels: 1 });
+          acc.set(key, {
+            species: l.species, bag: m.bag, planned: l.count,
+            withMargin: 0, parcels: 1, taluks: [p.taluk],
+          });
         }
       });
     });

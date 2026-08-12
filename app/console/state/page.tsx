@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useDemo } from "@/components/DemoContext";
 import { tr } from "@/lib/i18n";
 import { ALL_PARCELS as PARCELS, TOTAL_TALUKS, byAttention } from "@/lib/data";
+import { SEED_OFFERS, SEED_VERIFICATIONS } from "@/lib/offers";
+import { buildRegister, cohorts, overlappingTaluks, STAGE_LABEL } from "@/lib/register";
 
 export default function StateView() {
   const { lang, role } = useDemo();
@@ -41,6 +43,12 @@ export default function StateView() {
     );
   }
 
+  // the register spans both cohorts; the seeded pipeline stands in for the
+  // session store, which the console does not share
+  const register = buildRegister(SEED_OFFERS, SEED_VERIFICATIONS, []);
+  const cohortRows = cohorts(register);
+  const bothStages = overlappingTaluks(register);
+
   const districts = Array.from(new Set(PARCELS.map((p) => p.district)));
   const below = PARCELS.filter((p) => p.survival < 75);
   const escalations = PARCELS.filter((p) => p.status === "rectification");
@@ -58,6 +66,51 @@ export default function StateView() {
       <h1 className="page">{tr("stateView", lang)}</h1>
       <p className="lede">{tr("programme", lang)}</p>
 
+      <div className="cohorts">
+        {cohortRows.map((c) => (
+          <div key={c.season} className="cohort">
+            <div className="season">{c.season}</div>
+            <div className="bar">
+              {c.planted > 0 && (
+                <span className="seg planted" style={{ flex: c.planted }}>
+                  {c.planted}
+                </span>
+              )}
+              {c.approved > 0 && (
+                <span className="seg approved" style={{ flex: c.approved }}>
+                  {c.approved}
+                </span>
+              )}
+              {c.verifying > 0 && (
+                <span className="seg verifying" style={{ flex: c.verifying }}>
+                  {c.verifying}
+                </span>
+              )}
+              {c.offered > 0 && (
+                <span className="seg offered" style={{ flex: c.offered }}>
+                  {c.offered}
+                </span>
+              )}
+            </div>
+            <div className="legend">
+              {c.planted > 0 && <span><i className="planted" />{c.planted} {en ? STAGE_LABEL.planted.en : STAGE_LABEL.planted.kn}</span>}
+              {c.approved > 0 && <span><i className="approved" />{c.approved} {en ? STAGE_LABEL.approved.en : STAGE_LABEL.approved.kn}</span>}
+              {c.verifying > 0 && <span><i className="verifying" />{c.verifying} {en ? STAGE_LABEL.verifying.en : STAGE_LABEL.verifying.kn}</span>}
+              {c.offered > 0 && <span><i className="offered" />{c.offered} {en ? STAGE_LABEL.offered.en : STAGE_LABEL.offered.kn}</span>}
+              {c.notAccepted > 0 && <span className="muted">{c.notAccepted} {en ? STAGE_LABEL.notAccepted.en : STAGE_LABEL.notAccepted.kn}</span>}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {bothStages.length > 0 && (
+        <p className="note" style={{ borderTop: 0, marginTop: 0, marginBottom: 20 }}>
+          {en
+            ? `Both cohorts are present in ${bothStages.join(", ")} — a 2027 plantation under monitoring alongside land being verified for 2028. A programme running to 2034 is never at one stage.`
+            : `${bothStages.join(", ")} ನಲ್ಲಿ ಎರಡೂ ಗುಂಪುಗಳಿವೆ — ನಿಗಾದಲ್ಲಿರುವ 2027ರ ನೆಡುತೋಪು ಮತ್ತು 2028ಕ್ಕಾಗಿ ಪರಿಶೀಲನೆಯಲ್ಲಿರುವ ಭೂಮಿ. 2034ರವರೆಗೆ ನಡೆಯುವ ಕಾರ್ಯಕ್ರಮ ಎಂದಿಗೂ ಒಂದೇ ಹಂತದಲ್ಲಿ ಇರುವುದಿಲ್ಲ.`}
+        </p>
+      )}
+
       <div className="metrics">
         <div className="metric">
           <div className="k">{tr("districts", lang)}</div>
@@ -69,14 +122,16 @@ export default function StateView() {
           <div className="v">{TOTAL_TALUKS} / 240</div>
         </div>
         <div className="metric">
-          <div className="k">{tr("parcels", lang)}</div>
+          <div className="k">{en ? "Planted parcels" : "ನೆಟ್ಟ ಜಮೀನುಗಳು"}</div>
           <div className="v">{PARCELS.length}</div>
+          <div className="n">{en ? "Monsoon 2027 cohort" : "ಮಳೆಗಾಲ 2027 ಗುಂಪು"}</div>
         </div>
         <div className="metric">
           <div className="k">{tr("belowThreshold", lang)}</div>
           <div className="v" style={{ color: "var(--red)" }}>{below.length}</div>
           <div className="n">
-            {tr("openEscalations", lang)}: {escalations.length}
+            {tr("openEscalations", lang)}: {escalations.length} ·{" "}
+            {en ? "Monsoon 2027 only" : "ಮಳೆಗಾಲ 2027 ಮಾತ್ರ"}
           </div>
         </div>
       </div>

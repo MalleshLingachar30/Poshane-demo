@@ -77,6 +77,16 @@ export type Parcel = {
   survivalCountedOn: string;
   nextCensus: string;
   status: Status;
+  // Provenance. A planted parcel is the far end of the same chain a new offer
+  // enters today: a department offered it, an officer walked it, IAFT approved
+  // a plan for it. Without these a 2027 parcel looks like it appeared by itself.
+  offerRef?: string;
+  deptEn?: string;
+  deptKn?: string;
+  verifiedByEn?: string;
+  verifiedByKn?: string;
+  planApprovedOn?: string;
+  season?: string;
   rectification?: {
     ownerEn: string;
     ownerKn: string;
@@ -504,7 +514,109 @@ const GENERATED: Parcel[] = DISTRICTS.flatMap((d) =>
   d.taluks.flatMap((t) => Array.from({ length: t.n }, (_, i) => makeParcel(d, t, i))),
 );
 
-export const ALL_PARCELS: Parcel[] = [...PARCELS, ...GENERATED];
+
+// ---------------------------------------------------------------------------
+// Provenance for the planted cohort.
+//
+// These parcels were verified and approved in the 2027 cycle. The full walk,
+// survey and plan records for them sit in the programme archive; what is kept
+// here is the chain of responsibility, so any planted parcel can be traced back
+// to the department that offered it and the officer who walked it.
+// ---------------------------------------------------------------------------
+
+const PROV_DEPTS: [string, string][] = [
+  ["Karnataka Forest Department", "ಕರ್ನಾಟಕ ಅರಣ್ಯ ಇಲಾಖೆ"],
+  ["Revenue Department", "ಕಂದಾಯ ಇಲಾಖೆ"],
+  ["Minor Irrigation Department", "ಸಣ್ಣ ನೀರಾವರಿ ಇಲಾಖೆ"],
+  ["Gram Panchayat", "ಗ್ರಾಮ ಪಂಚಾಯಿತಿ"],
+  ["Public Works Department", "ಲೋಕೋಪಯೋಗಿ ಇಲಾಖೆ"],
+];
+
+/**
+ * The verification cadre is posted by taluk: two officers to each, and an
+ * officer verifies only in the taluk they are posted to. So the officer named
+ * on a parcel is derived from that parcel's taluk, and their rank stays fixed —
+ * a DFO reading this would notice at once if a Hosadurga officer appeared on a
+ * Ballari parcel, or if the same person changed rank between screens.
+ */
+const CADRE_NAMES = [
+  "N. Basavaraj", "P. Shivakumar", "A. Nagaveni", "T. Girish",
+  "V. Mallikarjun", "D. Chandrashekar", "L. Vijayalakshmi", "C. Ramesh",
+  "J. Prakash", "U. Savitha", "Y. Halappa", "E. Sridhar",
+  "F. Ibrahim Sab", "Q. Yashodha", "W. Kotresh", "Z. Anantha",
+  "S. Netravathi", "B. Lokesh", "H. Rudramma", "G. Puttaswamy",
+  "M. Sharanappa", "K. Bhagyamma", "R. Sangappa", "S. Meenakshi",
+  "N. Hanumanthappa", "P. Jyothi", "A. Veeresh", "T. Kamala",
+  "V. Somashekar", "D. Renuka", "L. Basanagouda", "C. Padmavathi",
+  "J. Nagaraj", "U. Shobha", "Y. Chennabasappa", "E. Lalitha",
+  "F. Mahadevappa", "Q. Sunanda", "W. Siddappa", "Z. Roopa",
+  "S. Gangadhar", "B. Vasantha", "H. Muniyappa", "G. Indira",
+];
+
+/**
+ * The four taluks the verification module covers have named officers there;
+ * the same people must appear here, or the same name turns up in two postings.
+ */
+const NAMED_POSTINGS: Record<string, [string, string]> = {
+  Hosadurga: ["S. Rangappa", "RFO"],
+  Challakere: ["H. Thippeswamy", "RFO"],
+  Sira: ["M. Latha", "RFO"],
+  Savadatti: ["R. Patil", "RFO"],
+};
+
+/**
+ * One officer per taluk, assigned by position rather than by hash so that no
+ * name can land in two postings. Taluks are sorted first, so the assignment is
+ * stable whatever order the parcels arrive in.
+ */
+const POSTING = new Map<string, { en: string; kn: string }>();
+
+function assignPostings(taluks: string[]) {
+  let next = 0;
+  [...new Set(taluks)].sort().forEach((t) => {
+    const named = NAMED_POSTINGS[t];
+    if (named) {
+      const [n, rk] = named;
+      POSTING.set(t, {
+        en: `${n}, ${rk} (retd) — ${t}`,
+        kn: `${n}, ${rk === "RFO" ? "ಆರ್‌ಎಫ್‌ಒ" : "ಡಿಆರ್‌ಎಫ್‌ಒ"} (ನಿವೃತ್ತ) — ${t}`,
+      });
+      return;
+    }
+    const name = CADRE_NAMES[next % CADRE_NAMES.length];
+    const rank = next % 2 === 0 ? "RFO" : "DRFO";
+    next += 1;
+    POSTING.set(t, {
+      en: `${name}, ${rank} (retd) — ${t}`,
+      kn: `${name}, ${rank === "RFO" ? "ಆರ್‌ಎಫ್‌ಒ" : "ಡಿಆರ್‌ಎಫ್‌ಒ"} (ನಿವೃತ್ತ) — ${t}`,
+    });
+  });
+}
+
+function cadreForTaluk(taluk: string): { en: string; kn: string } {
+  return POSTING.get(taluk) ?? { en: `Verification officer — ${taluk}`, kn: `ಪರಿಶೀಲನಾ ಅಧಿಕಾರಿ — ${taluk}` };
+}
+
+function provenance(p: Parcel, i: number): Parcel {
+  const r = seeded(p.id + "prov");
+  const [dEn, dKn] = PROV_DEPTS[Math.floor(r() * PROV_DEPTS.length)];
+  const code = p.id.split("-").slice(1, 3).join("-");
+  const officer = cadreForTaluk(p.taluk);
+  return {
+    ...p,
+    offerRef: `OFR-${code}-${String(1 + (i * 13) % 900).padStart(4, "0")}`,
+    deptEn: dEn,
+    deptKn: dKn,
+    verifiedByEn: officer.en,
+    verifiedByKn: officer.kn,
+    planApprovedOn: `${["12", "19", "26"][Math.floor(r() * 3)]} ${["Mar", "Apr", "May"][Math.floor(r() * 3)]} 2027`,
+    season: "Monsoon 2027",
+  };
+}
+
+const RAW_PARCELS: Parcel[] = [...PARCELS, ...GENERATED];
+assignPostings(RAW_PARCELS.map((p) => p.taluk));
+export const ALL_PARCELS: Parcel[] = RAW_PARCELS.map(provenance);
 
 export const TOTAL_TALUKS = new Set(
   ALL_PARCELS.map((p) => `${p.district}/${p.taluk}`),

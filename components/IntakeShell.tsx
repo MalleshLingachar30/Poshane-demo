@@ -28,7 +28,7 @@ const StoreCtx = createContext<Store>({
 });
 export const useOffers = () => useContext(StoreCtx);
 
-type NavKey = "navAdd" | "navUpload" | "navRegister" | "navTemplate" | "navRecord" | "navVerifyReg" | "navCompare" | "navPlans" | "navReview" | "navNursery";
+type NavKey = "navAdd" | "navUpload" | "navRegister" | "navTemplate" | "navRecord" | "navVerifyReg" | "navCompare" | "navPlans" | "navReview" | "navNursery" | "navAllocation";
 
 const INTAKE_NAV: { href: string; key: NavKey }[] = [
   { href: "/intake", key: "navAdd" },
@@ -47,6 +47,7 @@ const PLAN_NAV: { href: string; key: NavKey }[] = [
   { href: "/intake/plans", key: "navPlans" },
   { href: "/intake/review", key: "navReview" },
   { href: "/intake/nursery", key: "navNursery" },
+  { href: "/intake/allocation", key: "navAllocation" },
 ];
 
 export default function IntakeShell({ children }: { children: ReactNode }) {
@@ -93,19 +94,21 @@ export default function IntakeShell({ children }: { children: ReactNode }) {
   const onIntakeForm = path === "/intake" || path === "/intake/upload";
 
   // Each section is a different activity, done by a different person.
-  const onPlanning = ["/intake/plans", "/intake/review", "/intake/nursery"].includes(path);
+  const onPlanning = ["/intake/plans", "/intake/review", "/intake/nursery", "/intake/allocation"].includes(path);
   const onVerification = !onPlanning && (path.startsWith("/intake/verif") || path === "/intake/compare");
 
   const heading =
     path === "/intake/plans" ? "hPlans"
     : path === "/intake/review" ? "hReview"
     : path === "/intake/nursery" ? "hNursery"
+    : path === "/intake/allocation" ? "hAllocation"
     : path === "/intake/compare" ? "hCompare"
     : onVerification ? "hVerify" : "hIntake";
   const lede =
     path === "/intake/plans" ? "ledePlans"
     : path === "/intake/review" ? "ledeReview"
     : path === "/intake/nursery" ? "ledeNursery"
+    : path === "/intake/allocation" ? "ledeAllocation"
     : path === "/intake/compare" ? "ledeCompare"
     : onVerification ? "ledeVerify" : "ledeIntake";
   const nav = onPlanning ? PLAN_NAV : onVerification ? VERIFY_NAV : INTAKE_NAV;
