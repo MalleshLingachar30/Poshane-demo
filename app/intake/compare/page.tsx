@@ -13,7 +13,7 @@ export default function Compare() {
   const [origin, setOrigin] = useState("");
   useEffect(() => setOrigin(window.location.origin), []);
   const en = lang === "en";
-  const { offers, verifications, addVerification, setOfferState } = useOffers();
+  const { offers, verifications, addVerification, setOfferState, addPlan } = useOffers();
 
   const [only, setOnly] = useState("");
   const [open, setOpen] = useState<string | null>(null);
@@ -21,6 +21,7 @@ export default function Compare() {
   const all = useMemo(() => pairs(offers, verifications), [offers, verifications]);
 
   const list = useMemo(() => {
+    if (only === "session") return all.filter((p) => p.verification?.isNew);
     if (only === "ready") return all.filter((p) => p.verification?.decision === "verified" && !p.verification.locationId);
     if (only === "issued") return all.filter((p) => p.verification?.locationId);
     if (only === "rejected") return all.filter((p) => p.verification?.decision === "rejected");
@@ -28,15 +29,25 @@ export default function Compare() {
     return all.filter((p) => p.verification);
   }, [all, only]);
 
+  // whatever was recorded during the demonstration sits at the top
+  const ordered = useMemo(
+    () => [...list].sort((a, b) => Number(!!b.verification?.isNew) - Number(!!a.verification?.isNew)),
+    [list],
+  );
+
   const issue = (ref: string) => {
     const p = all.find((x) => x.offer.ref === ref);
     if (!p?.verification) return;
-    addVerification({
+    const withId = {
       ...p.verification,
       locationId: nextLocationId(p.offer, verifications),
       issuedOn: en ? "today" : "ಇಂದು",
-    });
+    };
+    addVerification(withId);
     setOfferState(ref, "approved");
+    // the identity and the plan are created together — a parcel with a Location
+    // ID but no site plan would never reach IAFT review or the nursery statement
+    addPlan(p.offer, withId);
   };
 
   return (
@@ -46,6 +57,7 @@ export default function Compare() {
           <span>{tr("stage", lang)}</span>
           <select className="role" value={only} onChange={(e) => setOnly(e.target.value)}>
             <option value="">{en ? "Visited" : "ಭೇಟಿ ಆದವು"}</option>
+            <option value="session">{tr("thisSession", lang)}</option>
             <option value="ready">{tr("readyToIssue", lang)}</option>
             <option value="issued">{tr("alreadyIssued", lang)}</option>
             <option value="rejected">{tr("notAccepted", lang)}</option>
@@ -56,7 +68,7 @@ export default function Compare() {
       </div>
 
       <div className="ik-rows">
-        {list.map((p) => {
+        {ordered.map((p) => {
           const o = p.offer;
           const v = p.verification;
           const rows = differences(p, lang);
@@ -67,7 +79,10 @@ export default function Compare() {
             <div key={o.ref} className="ik-offer">
               <button className="ik-offer-head" onClick={() => setOpen(isOpen ? null : o.ref)}>
                 <span className="grow">
-                  <span className="mono">{o.ref}</span>
+                  <span className="mono">
+                    {o.ref}
+                    {v?.isNew && <em className="ik-new"> · {tr("justRecorded", lang)}</em>}
+                  </span>
                   <span className="who">{o.village}, {en ? o.taluk : o.talukKn}</span>
                   <span className="sub">
                     {v

@@ -464,6 +464,8 @@ export const T = {
   issueId: { en: "Issue the Location ID", kn: "ಲೊಕೇಶನ್ ಐಡಿ ನೀಡಿ" },
   cannotIssue: { en: "Cannot be issued — the officer did not accept this parcel", kn: "ನೀಡಲಾಗದು — ಅಧಿಕಾರಿ ಈ ಜಮೀನನ್ನು ಸ್ವೀಕರಿಸಿಲ್ಲ" },
   readyToIssue: { en: "Ready to issue", kn: "ನೀಡಲು ಸಿದ್ಧ" },
+  thisSession: { en: "Recorded in this session", kn: "ಈ ಅವಧಿಯಲ್ಲಿ ದಾಖಲಾದವು" },
+  justRecorded: { en: "just recorded", kn: "ಈಗಷ್ಟೇ ದಾಖಲಾಗಿದೆ" },
   alreadyIssued: { en: "Issued", kn: "ನೀಡಲಾಗಿದೆ" },
   noIdYet: {
     en: "No Location ID. An offer carries only its offer reference until a verification officer has walked it.",

@@ -19,10 +19,12 @@ type Store = {
   addVerification: (v: Verification) => void;
   setOfferState: (ref: string, state: Offer["state"]) => void;
   updatePlan: (ref: string, patch: Partial<Ssp>) => void;
+  addPlan: (o: Offer, v: Verification) => void;
 };
 const StoreCtx = createContext<Store>({
   offers: [], verifications: [], plans: [],
-  addOffer: () => {}, addVerification: () => {}, setOfferState: () => {}, updatePlan: () => {},
+  addOffer: () => {}, addVerification: () => {}, setOfferState: () => {},
+  updatePlan: () => {}, addPlan: () => {},
 });
 export const useOffers = () => useContext(StoreCtx);
 
@@ -110,7 +112,7 @@ export default function IntakeShell({ children }: { children: ReactNode }) {
   const navHead = onPlanning ? "grpPlans" : onVerification ? "grpVerify" : "grpIntake";
 
   return (
-    <StoreCtx.Provider value={{ offers, verifications, plans, addOffer, addVerification, setOfferState, updatePlan }}>
+    <StoreCtx.Provider value={{ offers, verifications, plans, addOffer, addVerification, setOfferState, updatePlan, addPlan }}>
       <main>
         <div className="ik-head">
           <h1 className="ik-title">{tr(heading, lang)}</h1>
