@@ -4,7 +4,8 @@ import { useMemo, useState } from "react";
 import { useDemo } from "@/components/DemoContext";
 import { useOffers } from "@/components/IntakeShell";
 import { tr, FIELDS } from "@/lib/intake";
-import { CADRE, runGate, ZONES, SOILS, DEPTHS, SLOPES, DRAINAGE, type Verification } from "@/lib/offers";
+import { CADRE, runGate, makeWalk, ZONES, SOILS, DEPTHS, SLOPES, DRAINAGE, type Verification, type Walk } from "@/lib/offers";
+import WalkMap from "@/components/WalkMap";
 
 const REASONS: [string, string][] = [
   ["Existing vegetation — tree cover already established", "ಈಗಿರುವ ಸಸ್ಯವರ್ಗ — ಈಗಾಗಲೇ ಮರಗಳಿವೆ"],
@@ -44,6 +45,7 @@ export default function RecordVisit() {
   const [waterDist, setWaterDist] = useState("");
   const [address, setAddress] = useState("");
   const [landType, setLandType] = useState("");
+  const [walk, setWalk] = useState<Walk | null>(null);
   const [decision, setDecision] = useState("");
   const [reason, setReason] = useState("");
   const [saved, setSaved] = useState<string | null>(null);
@@ -65,7 +67,7 @@ export default function RecordVisit() {
     setWalked(""); setClosed(true); setVeg(""); setWater(""); setAccess("");
     setEnc(""); setDisp(""); setCustody(""); setNotes(""); setDecision(""); setReason("");
     setZone(""); setSoil(""); setDepth(""); setSlope(""); setDrainage("");
-    setWaterDist(""); setAddress(""); setLandType("");
+    setWaterDist(""); setAddress(""); setLandType(""); setWalk(null);
   };
 
   const pick = (r: string) => {
@@ -91,6 +93,8 @@ export default function RecordVisit() {
         ? "Boundary walked with the village accountant present. A rocky strip on the eastern edge was excluded."
         : "ಗ್ರಾಮ ಲೆಕ್ಕಾಧಿಕಾರಿ ಸಮ್ಮುಖದಲ್ಲಿ ಗಡಿ ನಡೆಯಲಾಗಿದೆ. ಪೂರ್ವ ಅಂಚಿನ ಬಂಡೆ ಪಟ್ಟಿಯನ್ನು ಹೊರಗಿಡಲಾಗಿದೆ.",
     );
+    setWalk(makeWalk(offer.lat, offer.lng, offer.offered * 0.94, offer.ref + "demo",
+      `VER-${officer.taluk.slice(0, 3).toUpperCase()}-014`));
     setZone("centdry"); setSoil("redloam"); setDepth("medium");
     setSlope("gentle"); setDrainage("well"); setWaterDist("620");
     setAddress(en
@@ -103,7 +107,7 @@ export default function RecordVisit() {
 
   const complete =
     !!offer && !!walked && !!veg && !!water && !!access && !!enc && !!disp && !!decision &&
-    !!zone && !!soil && !!depth && !!slope && !!drainage && !!address &&
+    !!zone && !!soil && !!depth && !!slope && !!drainage && !!address && !!walk &&
     (decision === "verified" ? !!custody && closed : !!reason);
 
   const submit = () => {
@@ -121,6 +125,7 @@ export default function RecordVisit() {
       addressEn: address,
       landTypeConfirmed: landType,
       notesEn: notes, notesKn: notes,
+      walk: walk ?? undefined,
       gate: runGate(offer, Number(walked) || 0, closed),
       decision: decision === "verified" ? "verified" : "rejected",
       rejectionEn: r ? r[0] : undefined,
@@ -222,6 +227,43 @@ export default function RecordVisit() {
                 </label>
               </div>
             </div>
+
+            <div className="ik-actions" style={{ borderTop: 0, paddingTop: 14 }}>
+              <button
+                className="ik-btn ghost"
+                onClick={() =>
+                  setWalk(makeWalk(offer.lat, offer.lng, Number(walked) || offer.offered,
+                    offer.ref + officer.key,
+                    `VER-${officer.taluk.slice(0, 3).toUpperCase()}-014`))
+                }
+              >
+                {tr("recordWalk", lang)}
+              </button>
+            </div>
+
+            {!walk ? (
+              <p className="ik-note">{tr("walkNone", lang)}</p>
+            ) : (
+              <div className="ik-split2" style={{ marginTop: 14 }}>
+                <div>
+                  <WalkMap walk={walk} />
+                </div>
+                <div>
+                  <table className="ik-compare" style={{ marginTop: 0 }}>
+                    <tbody>
+                      <tr><td>{tr("walkPoints", lang)}</td><td>{walk.vertexCount.toLocaleString("en-IN")}</td></tr>
+                      <tr><td>{tr("walkAccuracy", lang)}</td><td>±{walk.gpsAccuracyM} m</td></tr>
+                      <tr><td>{tr("walkPerimeter", lang)}</td><td>{walk.perimeterM.toLocaleString("en-IN")} m</td></tr>
+                      <tr><td>{tr("walkTime", lang)}</td><td>{walk.startedAt} — {walk.endedAt}</td></tr>
+                      <tr><td>{tr("walkCentroid", lang)}</td><td>{walk.centroid[1].toFixed(5)}, {walk.centroid[0].toFixed(5)}</td></tr>
+                      <tr><td>{tr("walkDevice", lang)}</td><td>{walk.deviceId}</td></tr>
+                      <tr><td>{tr("walkVersion", lang)}</td><td>v{walk.geomVersion} · {tr("walkTolerance", lang)} {walk.simplifyToleranceM} m</td></tr>
+                    </tbody>
+                  </table>
+                  <p className="ik-note" style={{ marginTop: 8 }}>{tr("walkRaw", lang)}</p>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="ik-group">

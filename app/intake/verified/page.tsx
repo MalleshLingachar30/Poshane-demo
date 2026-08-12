@@ -5,6 +5,7 @@ import { useDemo } from "@/components/DemoContext";
 import { useOffers } from "@/components/IntakeShell";
 import { tr } from "@/lib/intake";
 import { CADRE, ZONES, SOILS, DEPTHS, SLOPES, DRAINAGE } from "@/lib/offers";
+import WalkMap from "@/components/WalkMap";
 
 export default function VisitsRecorded() {
   const { lang } = useDemo();
@@ -69,6 +70,24 @@ export default function VisitsRecorded() {
 
               {isOpen && (
                 <div className="ik-offer-body">
+                  {v.walk && (
+                    <div className="ik-split2" style={{ marginBottom: 14 }}>
+                      <div><WalkMap walk={v.walk} height={170} /></div>
+                      <div>
+                        <table className="ik-compare" style={{ marginTop: 0 }}>
+                          <tbody>
+                            <tr><td>{tr("walkPoints", lang)}</td><td>{v.walk.vertexCount.toLocaleString("en-IN")}</td></tr>
+                            <tr><td>{tr("walkAccuracy", lang)}</td><td>±{v.walk.gpsAccuracyM} m</td></tr>
+                            <tr><td>{tr("walkPerimeter", lang)}</td><td>{v.walk.perimeterM.toLocaleString("en-IN")} m</td></tr>
+                            <tr><td>{tr("walkTime", lang)}</td><td>{v.walk.startedAt} — {v.walk.endedAt}</td></tr>
+                            <tr><td>{tr("walkCentroid", lang)}</td><td>{v.walk.centroid[1].toFixed(5)}, {v.walk.centroid[0].toFixed(5)}</td></tr>
+                            <tr><td>{tr("walkDevice", lang)}</td><td>{v.walk.deviceId}</td></tr>
+                            <tr><td>{tr("walkVersion", lang)}</td><td>v{v.walk.geomVersion}</td></tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
                   <table className="ik-compare" style={{ maxWidth: 640 }}>
                     <tbody>
                       <tr><td>{tr("walkedArea", lang)}</td><td colSpan={2}>{(+v.offered).toFixed(2)} ha</td></tr>

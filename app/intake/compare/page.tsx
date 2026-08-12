@@ -1,13 +1,17 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDemo } from "@/components/DemoContext";
 import { useOffers } from "@/components/IntakeShell";
 import { tr } from "@/lib/intake";
 import { differences, nextLocationId, pairs } from "@/lib/offers";
+import WalkMap from "@/components/WalkMap";
+import { QRCodeSVG } from "qrcode.react";
 
 export default function Compare() {
   const { lang } = useDemo();
+  const [origin, setOrigin] = useState("");
+  useEffect(() => setOrigin(window.location.origin), []);
   const en = lang === "en";
   const { offers, verifications, addVerification, setOfferState } = useOffers();
 
@@ -109,6 +113,23 @@ export default function Compare() {
                         <b>{tr("officer", lang)}:</b> {en ? v.officerEn : v.officerKn} · {tr("visitedOn", lang)} {v.visitedOn}
                       </p>
                       {v.notesEn && <p className="ik-line quote">{en ? v.notesEn : v.notesKn}</p>}
+                      {v.walk && (
+                        <div className="ik-split2" style={{ margin: "14px 0" }}>
+                          <div><WalkMap walk={v.walk} height={170} /></div>
+                          <div>
+                            <table className="ik-compare" style={{ marginTop: 0 }}>
+                              <tbody>
+                                <tr><td>{tr("walkPoints", lang)}</td><td>{v.walk.vertexCount.toLocaleString("en-IN")}</td></tr>
+                                <tr><td>{tr("walkAccuracy", lang)}</td><td>±{v.walk.gpsAccuracyM} m</td></tr>
+                                <tr><td>{tr("walkPerimeter", lang)}</td><td>{v.walk.perimeterM.toLocaleString("en-IN")} m</td></tr>
+                                <tr><td>{tr("walkCentroid", lang)}</td><td>{v.walk.centroid[1].toFixed(5)}, {v.walk.centroid[0].toFixed(5)}</td></tr>
+                                <tr><td>{tr("walkDevice", lang)}</td><td>{v.walk.deviceId}</td></tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      )}
+
                       <p className="ik-line">
                         <b>{tr("gateResult", lang)}:</b>{" "}
                         {v.gate.validGeometry
@@ -121,9 +142,26 @@ export default function Compare() {
                       )}
 
                       {v.locationId ? (
-                        <div className="ik-banner ok" style={{ marginTop: 14 }}>
-                          <b>{tr("issued", lang)} — {v.locationId}</b>
-                          {tr("issuedNote", lang)}
+                        <div className="ik-issued">
+                          <div className="ik-issued-qr">
+                            {origin && (
+                              <QRCodeSVG
+                                value={`${origin}/p/${v.locationId}`}
+                                size={104}
+                                level="M"
+                                marginSize={0}
+                                bgColor="#ffffff"
+                                fgColor="#1c5a33"
+                              />
+                            )}
+                            <div className="cap">{tr("scanThis", lang)}</div>
+                          </div>
+                          <div>
+                            <div className="ik-issued-h">{tr("issued", lang)}</div>
+                            <div className="ik-issued-id">{v.locationId}</div>
+                            <p className="ik-line" style={{ marginTop: 8 }}>{tr("issuedNote", lang)}</p>
+                            <p className="ik-line" style={{ color: "var(--muted)" }}>{tr("tagReady", lang)}</p>
+                          </div>
                         </div>
                       ) : v.decision === "rejected" ? (
                         <div className="ik-banner bad" style={{ marginTop: 14 }}>

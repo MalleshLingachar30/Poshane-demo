@@ -25,6 +25,25 @@ export type Found = {
   notesKn?: string;
 };
 
+/**
+ * The boundary walk itself. Until this exists there is no polygon, and without a
+ * polygon the overlap gate and the area reconciliation have nothing to run on.
+ * The raw track is written once and never edited; the working polygon is the
+ * simplified version every later check uses. Schematic G2.
+ */
+export type Walk = {
+  points: [number, number][];   // [lng, lat] in walk order, ring closed
+  vertexCount: number;          // raw vertices before simplification
+  gpsAccuracyM: number;
+  deviceId: string;
+  startedAt: string;
+  endedAt: string;
+  perimeterM: number;
+  centroid: [number, number];
+  geomVersion: number;          // increments if a boundary is ever re-walked
+  simplifyToleranceM: number;
+};
+
 export type Gate = {
   validGeometry: boolean;
   vertices: number;
@@ -166,6 +185,7 @@ export type Verification = {
   landTypeConfirmed?: string;
   notesEn: string;
   notesKn: string;
+  walk?: Walk;
   gate: Gate;
   decision: "verified" | "rejected";
   rejectionEn?: string;
@@ -474,6 +494,13 @@ function buildVerification(s: Seed): Verification | null {
     addressEn: `${T[s.t][3]}, ${T[s.t][0]} taluk — reached from the ${T[s.t][2]} hobli road`,
     landTypeConfirmed: CAT[s.cat][0],
     notesEn: s.found.notesEn ?? "", notesKn: s.found.notesKn ?? "",
+    walk: makeWalk(
+      14.2 + s.n * 0.004,
+      76.4 + s.n * 0.006,
+      Number(s.found.offered ?? s.offered),
+      `${s.t}${s.n}W`,
+      `VER-${{ ctd: "CTD", tum: "TUM", blg: "BLG" }[s.d]}-${String(s.n).padStart(3, "0")}`,
+    ),
     gate: s.gate ?? { validGeometry: true, vertices: 0, walkedHa: 0, rtcHa: s.rtc, overlapPct: 0 },
     decision: verified ? "verified" : "rejected",
     rejectionEn: s.rej?.[0], rejectionKn: s.rej?.[1],
@@ -486,6 +513,76 @@ function buildVerification(s: Seed): Verification | null {
 export const SEED_OFFERS: Offer[] = S.map(build);
 export const SEED_VERIFICATIONS: Verification[] =
   S.map(buildVerification).filter((v): v is Verification => v !== null);
+
+/** Deterministic pseudo-random, so a given parcel always walks the same ring. */
+function seeded(key: string): () => number {
+  let h = 2166136261;
+  for (let i = 0; i < key.length; i++) {
+    h ^= key.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  let x = h >>> 0;
+  return () => {
+    x ^= x << 13; x >>>= 0;
+    x ^= x >> 17;
+    x ^= x << 5; x >>>= 0;
+    return x / 4294967296;
+  };
+}
+
+/**
+ * Produces a plausible walked ring around a parcel centre for the given area.
+ * In the field this comes from the handset; here it is derived so that every
+ * seeded record carries actual coordinates rather than an assertion.
+ */
+export function makeWalk(
+  lat: number,
+  lng: number,
+  areaHa: number,
+  seedKey: string,
+  device: string,
+): Walk {
+  const r = seeded(seedKey);
+  const sides = 8 + Math.floor(r() * 5);
+  const radiusM = Math.sqrt((areaHa * 10000) / Math.PI);
+  const points: [number, number][] = [];
+  for (let i = 0; i < sides; i++) {
+    const ang = (i / sides) * Math.PI * 2;
+    const jitter = 0.82 + r() * 0.36;              // parcels are not circles
+    const dN = Math.cos(ang) * radiusM * jitter;
+    const dE = Math.sin(ang) * radiusM * jitter;
+    points.push([
+      +(lng + dE / (111320 * Math.cos((lat * Math.PI) / 180))).toFixed(6),
+      +(lat + dN / 110540).toFixed(6),
+    ]);
+  }
+  points.push(points[0]);                           // close the ring
+
+  let perim = 0;
+  for (let i = 1; i < points.length; i++) {
+    const dx = (points[i][0] - points[i - 1][0]) * 111320 * Math.cos((lat * Math.PI) / 180);
+    const dy = (points[i][1] - points[i - 1][1]) * 110540;
+    perim += Math.sqrt(dx * dx + dy * dy);
+  }
+
+  const mins = 18 + Math.floor(areaHa * 9);
+  const h = 9 + Math.floor(r() * 3);
+  const m0 = 5 + Math.floor(r() * 40);
+  const end = m0 + mins;
+
+  return {
+    points,
+    vertexCount: 120 + Math.round(areaHa * 47),
+    gpsAccuracyM: 3 + Math.floor(r() * 4),
+    deviceId: device,
+    startedAt: `${String(h).padStart(2, "0")}:${String(m0 % 60).padStart(2, "0")}`,
+    endedAt: `${String(h + Math.floor(end / 60)).padStart(2, "0")}:${String(end % 60).padStart(2, "0")}`,
+    perimeterM: Math.round(perim),
+    centroid: [+lng.toFixed(6), +lat.toFixed(6)],
+    geomVersion: 1,
+    simplifyToleranceM: 2.5,
+  };
+}
 
 /** Runs the §6 gate on a walked boundary. Mirrors schematic G2. */
 export function runGate(o: Offer, walkedHa: number, valid: boolean): Gate {
