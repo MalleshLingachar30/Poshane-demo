@@ -28,7 +28,6 @@ export default function RecordVisit() {
   const officer = CADRE.find((c) => c.key === officerKey)!;
   const [ref, setRef] = useState("");
 
-  const [walked, setWalked] = useState("");
   const [closed, setClosed] = useState(true);
   const [veg, setVeg] = useState("");
   const [water, setWater] = useState("");
@@ -64,7 +63,7 @@ export default function RecordVisit() {
   const offer = offers.find((o) => o.ref === ref) ?? null;
 
   const clear = () => {
-    setWalked(""); setClosed(true); setVeg(""); setWater(""); setAccess("");
+    setClosed(true); setVeg(""); setWater(""); setAccess("");
     setEnc(""); setDisp(""); setCustody(""); setNotes(""); setDecision(""); setReason("");
     setZone(""); setSoil(""); setDepth(""); setSlope(""); setDrainage("");
     setWaterDist(""); setAddress(""); setLandType(""); setWalk(null);
@@ -80,7 +79,6 @@ export default function RecordVisit() {
 
   const fillExample = () => {
     if (!offer) return;
-    setWalked((offer.offered * 0.94).toFixed(2));
     setClosed(true);
     setVeg(offer.vegetation);
     setWater(offer.water);
@@ -105,8 +103,10 @@ export default function RecordVisit() {
     setReason("");
   };
 
+  const walkedHa = walk?.areaHa ?? 0;
+
   const complete =
-    !!offer && !!walked && !!veg && !!water && !!access && !!enc && !!disp && !!decision &&
+    !!offer && !!walk && !!veg && !!water && !!access && !!enc && !!disp && !!decision &&
     !!zone && !!soil && !!depth && !!slope && !!drainage && !!address && !!walk &&
     (decision === "verified" ? !!custody && closed : !!reason);
 
@@ -117,7 +117,7 @@ export default function RecordVisit() {
       ref: offer.ref,
       officerKey: officer.key, officerEn: officer.en, officerKn: officer.kn,
       visitedOn: en ? "today" : "ಇಂದು",
-      offered: walked,
+      offered: String(walkedHa),
       vegetation: veg, water, access, encroach: enc, dispute: disp,
       terrain: offer.terrain,
       zone, soil, depth, slope, drainage,
@@ -126,7 +126,7 @@ export default function RecordVisit() {
       landTypeConfirmed: landType,
       notesEn: notes, notesKn: notes,
       walk: walk ?? undefined,
-      gate: runGate(offer, Number(walked) || 0, closed),
+      gate: { ...runGate(offer, walkedHa, closed), vertices: walk!.vertexCount },
       decision: decision === "verified" ? "verified" : "rejected",
       rejectionEn: r ? r[0] : undefined,
       rejectionKn: r ? r[1] : undefined,
@@ -213,32 +213,30 @@ export default function RecordVisit() {
 
           <div className="ik-group">
             <h2>{tr("boundaryWalk", lang)}</h2>
+            <p className="ik-note" style={{ marginTop: 0, marginBottom: 12 }}>{tr("walkIsInput", lang)}</p>
             <div className="ik-fields" style={{ maxWidth: 640 }}>
               <div className="ik-field">
-                <label>{tr("walkedArea", lang)} <span className="req">{tr("required", lang)}</span></label>
-                <input value={walked} inputMode="decimal" onChange={(e) => setWalked(e.target.value)} />
-                <div className="hint">{tr("declaredWas", lang)} {offer.offered.toFixed(2)} ha</div>
-              </div>
-              <div className="ik-field">
-                <label style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 22 }}>
+                <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
                   <input type="checkbox" checked={closed} style={{ width: "auto" }}
                          onChange={(e) => setClosed(e.target.checked)} />
                   {tr("geometryClosed", lang)}
                 </label>
+                <div className="hint">{tr("declaredWas", lang)} {offer.offered.toFixed(2)} ha</div>
               </div>
             </div>
 
             <div className="ik-actions" style={{ borderTop: 0, paddingTop: 14 }}>
               <button
-                className="ik-btn ghost"
+                className={walk ? "ik-btn ghost" : "ik-btn"}
                 onClick={() =>
-                  setWalk(makeWalk(offer.lat, offer.lng, Number(walked) || offer.offered,
-                    offer.ref + officer.key,
+                  setWalk(makeWalk(offer.lat, offer.lng, offer.offered,
+                    offer.ref + officer.key + (walk ? walk.geomVersion + 1 : ""),
                     `VER-${officer.taluk.slice(0, 3).toUpperCase()}-014`))
                 }
               >
-                {tr("recordWalk", lang)}
+                {walk ? tr("walkAgain", lang) : tr("recordWalk", lang)}
               </button>
+              {walk && <span className="ik-done">✓ {tr("walkRecorded", lang)}</span>}
             </div>
 
             {!walk ? (
@@ -251,6 +249,8 @@ export default function RecordVisit() {
                 <div>
                   <table className="ik-compare" style={{ marginTop: 0 }}>
                     <tbody>
+                      <tr><td>{tr("areaComputed", lang)}</td>
+                          <td><strong>{walk.areaHa.toFixed(2)} ha</strong></td></tr>
                       <tr><td>{tr("walkPoints", lang)}</td><td>{walk.vertexCount.toLocaleString("en-IN")}</td></tr>
                       <tr><td>{tr("walkAccuracy", lang)}</td><td>±{walk.gpsAccuracyM} m</td></tr>
                       <tr><td>{tr("walkPerimeter", lang)}</td><td>{walk.perimeterM.toLocaleString("en-IN")} m</td></tr>

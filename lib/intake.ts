@@ -568,6 +568,12 @@ export const T = {
   geometryClosed: { en: "Boundary closed without crossing itself", kn: "ಗಡಿ ತನ್ನನ್ನೇ ಕತ್ತರಿಸದೆ ಮುಚ್ಚಿದೆ" },
   recordWalk: { en: "Record the walked boundary", kn: "ನಡೆದ ಗಡಿಯನ್ನು ದಾಖಲಿಸಿ" },
   walkRecorded: { en: "Boundary recorded", kn: "ಗಡಿ ದಾಖಲಾಗಿದೆ" },
+  walkAgain: { en: "Record it again", kn: "ಮತ್ತೆ ದಾಖಲಿಸಿ" },
+  areaComputed: { en: "Area, computed from the ring", kn: "ಗಡಿಯಿಂದ ಲೆಕ್ಕಹಾಕಿದ ವಿಸ್ತೀರ್ಣ" },
+  walkIsInput: {
+    en: "Nobody types the area. The handset logs a fix every few seconds as the officer walks, and the area and perimeter are computed from that track. This is why the walked figure can differ from the department's.",
+    kn: "ವಿಸ್ತೀರ್ಣವನ್ನು ಯಾರೂ ಟೈಪ್ ಮಾಡುವುದಿಲ್ಲ. ಅಧಿಕಾರಿ ನಡೆಯುವಾಗ ಸಾಧನ ಪ್ರತಿ ಕೆಲವು ಸೆಕೆಂಡಿಗೊಮ್ಮೆ ಸ್ಥಾನ ದಾಖಲಿಸುತ್ತದೆ, ಆ ಜಾಡಿನಿಂದ ವಿಸ್ತೀರ್ಣ ಮತ್ತು ಸುತ್ತಳತೆ ಲೆಕ್ಕಹಾಕಲಾಗುತ್ತದೆ. ಆದ್ದರಿಂದಲೇ ನಡೆದ ಅಂಕಿ ಇಲಾಖೆಯದಕ್ಕಿಂತ ಭಿನ್ನವಾಗಿರಬಹುದು.",
+  },
   walkNone: {
     en: "No boundary recorded yet. Until the officer walks it there is no polygon, and without a polygon nothing can be checked.",
     kn: "ಇನ್ನೂ ಗಡಿ ದಾಖಲಾಗಿಲ್ಲ. ಅಧಿಕಾರಿ ನಡೆಯುವವರೆಗೆ ಬಹುಭುಜ ಇಲ್ಲ, ಬಹುಭುಜ ಇಲ್ಲದೆ ಏನನ್ನೂ ಪರಿಶೀಲಿಸಲಾಗದು.",

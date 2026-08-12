@@ -39,6 +39,7 @@ export type Walk = {
   startedAt: string;
   endedAt: string;
   perimeterM: number;
+  areaHa: number;               // computed from the ring, never typed
   centroid: [number, number];
   geomVersion: number;          // increments if a boundary is ever re-walked
   simplifyToleranceM: number;
@@ -467,6 +468,22 @@ const ZONE_BY_TALUK: Record<string, string> = {
 };
 const SOIL_BY_SEED = ["redloam", "redsandy", "blackdeep", "redloam", "gravel"];
 
+/** One walk per seed, so the same parcel always produces the same ring. */
+const WALK_CACHE = new Map<number, Walk>();
+function walkFor(s: Seed): Walk {
+  const hit = WALK_CACHE.get(s.n);
+  if (hit) return hit;
+  const w = makeWalk(
+    14.2 + s.n * 0.004,
+    76.4 + s.n * 0.006,
+    Number(s.found?.offered ?? s.offered),
+    `${s.t}${s.n}W`,
+    `VER-${({ ctd: "CTD", tum: "TUM", blg: "BLG" } as Record<string, string>)[s.d]}-${String(s.n).padStart(3, "0")}`,
+  );
+  WALK_CACHE.set(s.n, w);
+  return w;
+}
+
 function buildVerification(s: Seed): Verification | null {
   if (!s.cadre || !s.found) return null;
   const cad = CADRE.find((c) => c.key === s.cadre)!;
@@ -478,7 +495,7 @@ function buildVerification(s: Seed): Verification | null {
     ref,
     officerKey: cad.key, officerEn: cad.en, officerKn: cad.kn,
     visitedOn: VISIT_DAY[ref] ?? s.day.replace(/^\d+/, (d) => String(Number(d) + 9)),
-    offered: s.found.offered ?? s.offered.toFixed(2),
+    offered: String(walkFor(s).areaHa),
     vegetation: s.found.vegetation ?? s.veg,
     water: s.found.water ?? s.water,
     access: s.found.access ?? s.access,
@@ -494,14 +511,15 @@ function buildVerification(s: Seed): Verification | null {
     addressEn: `${T[s.t][3]}, ${T[s.t][0]} taluk — reached from the ${T[s.t][2]} hobli road`,
     landTypeConfirmed: CAT[s.cat][0],
     notesEn: s.found.notesEn ?? "", notesKn: s.found.notesKn ?? "",
-    walk: makeWalk(
-      14.2 + s.n * 0.004,
-      76.4 + s.n * 0.006,
-      Number(s.found.offered ?? s.offered),
-      `${s.t}${s.n}W`,
-      `VER-${{ ctd: "CTD", tum: "TUM", blg: "BLG" }[s.d]}-${String(s.n).padStart(3, "0")}`,
-    ),
-    gate: s.gate ?? { validGeometry: true, vertices: 0, walkedHa: 0, rtcHa: s.rtc, overlapPct: 0 },
+    walk: walkFor(s),
+    gate: {
+      validGeometry: s.gate ? s.gate.validGeometry : true,
+      vertices: walkFor(s).vertexCount,
+      walkedHa: walkFor(s).areaHa,
+      rtcHa: s.rtc,
+      overlapPct: s.gate?.overlapPct ?? 0,
+      overlapWith: s.gate?.overlapWith,
+    },
     decision: verified ? "verified" : "rejected",
     rejectionEn: s.rej?.[0], rejectionKn: s.rej?.[1],
     custodyEn: s.custody?.[0], custodyKn: s.custody?.[1],
@@ -538,32 +556,58 @@ function seeded(key: string): () => number {
 export function makeWalk(
   lat: number,
   lng: number,
-  areaHa: number,
+  approxHa: number,
   seedKey: string,
   device: string,
 ): Walk {
   const r = seeded(seedKey);
   const sides = 8 + Math.floor(r() * 5);
-  const radiusM = Math.sqrt((areaHa * 10000) / Math.PI);
+  // the officer walks the ground, not a target figure — the ring is irregular
+  // and its enclosed area falls where it falls
+  const radiusM = Math.sqrt((approxHa * 10000) / Math.PI) * (0.9 + r() * 0.14);
+  const mPerDegLng = 111320 * Math.cos((lat * Math.PI) / 180);
+  const mPerDegLat = 110540;
+
   const points: [number, number][] = [];
   for (let i = 0; i < sides; i++) {
     const ang = (i / sides) * Math.PI * 2;
-    const jitter = 0.82 + r() * 0.36;              // parcels are not circles
-    const dN = Math.cos(ang) * radiusM * jitter;
-    const dE = Math.sin(ang) * radiusM * jitter;
+    const jitter = 0.82 + r() * 0.36;
     points.push([
-      +(lng + dE / (111320 * Math.cos((lat * Math.PI) / 180))).toFixed(6),
-      +(lat + dN / 110540).toFixed(6),
+      +(lng + (Math.sin(ang) * radiusM * jitter) / mPerDegLng).toFixed(6),
+      +(lat + (Math.cos(ang) * radiusM * jitter) / mPerDegLat).toFixed(6),
     ]);
   }
-  points.push(points[0]);                           // close the ring
+  points.push(points[0]);
 
+  // perimeter: sum of the leg distances
   let perim = 0;
   for (let i = 1; i < points.length; i++) {
-    const dx = (points[i][0] - points[i - 1][0]) * 111320 * Math.cos((lat * Math.PI) / 180);
-    const dy = (points[i][1] - points[i - 1][1]) * 110540;
+    const dx = (points[i][0] - points[i - 1][0]) * mPerDegLng;
+    const dy = (points[i][1] - points[i - 1][1]) * mPerDegLat;
     perim += Math.sqrt(dx * dx + dy * dy);
   }
+
+  // area: shoelace over the ring, in metres, then to hectares
+  let twiceArea = 0;
+  let cx = 0, cy = 0;
+  for (let i = 1; i < points.length; i++) {
+    const x1 = (points[i - 1][0] - lng) * mPerDegLng;
+    const y1 = (points[i - 1][1] - lat) * mPerDegLat;
+    const x2 = (points[i][0] - lng) * mPerDegLng;
+    const y2 = (points[i][1] - lat) * mPerDegLat;
+    const cross = x1 * y2 - x2 * y1;
+    twiceArea += cross;
+    cx += (x1 + x2) * cross;
+    cy += (y1 + y2) * cross;
+  }
+  const areaM2 = Math.abs(twiceArea) / 2;
+  const areaHa = +(areaM2 / 10000).toFixed(2);
+  const centroid: [number, number] = twiceArea === 0
+    ? [+lng.toFixed(6), +lat.toFixed(6)]
+    : [
+        +(lng + cx / (3 * twiceArea) / mPerDegLng).toFixed(6),
+        +(lat + cy / (3 * twiceArea) / mPerDegLat).toFixed(6),
+      ];
 
   const mins = 18 + Math.floor(areaHa * 9);
   const h = 9 + Math.floor(r() * 3);
@@ -578,7 +622,8 @@ export function makeWalk(
     startedAt: `${String(h).padStart(2, "0")}:${String(m0 % 60).padStart(2, "0")}`,
     endedAt: `${String(h + Math.floor(end / 60)).padStart(2, "0")}:${String(end % 60).padStart(2, "0")}`,
     perimeterM: Math.round(perim),
-    centroid: [+lng.toFixed(6), +lat.toFixed(6)],
+    areaHa,
+    centroid,
     geomVersion: 1,
     simplifyToleranceM: 2.5,
   };

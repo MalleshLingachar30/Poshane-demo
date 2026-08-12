@@ -119,7 +119,8 @@ export default function Compare() {
                           <div>
                             <table className="ik-compare" style={{ marginTop: 0 }}>
                               <tbody>
-                                <tr><td>{tr("walkPoints", lang)}</td><td>{v.walk.vertexCount.toLocaleString("en-IN")}</td></tr>
+                                <tr><td>{tr("areaComputed", lang)}</td><td><strong>{v.walk.areaHa.toFixed(2)} ha</strong></td></tr>
+                            <tr><td>{tr("walkPoints", lang)}</td><td>{v.walk.vertexCount.toLocaleString("en-IN")}</td></tr>
                                 <tr><td>{tr("walkAccuracy", lang)}</td><td>±{v.walk.gpsAccuracyM} m</td></tr>
                                 <tr><td>{tr("walkPerimeter", lang)}</td><td>{v.walk.perimeterM.toLocaleString("en-IN")} m</td></tr>
                                 <tr><td>{tr("walkCentroid", lang)}</td><td>{v.walk.centroid[1].toFixed(5)}, {v.walk.centroid[0].toFixed(5)}</td></tr>
