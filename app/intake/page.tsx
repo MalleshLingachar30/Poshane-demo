@@ -2,12 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { useDemo } from "@/components/DemoContext";
-import { useSubmitter } from "@/components/IntakeShell";
+import { useSubmitter, useOffers } from "@/components/IntakeShell";
 import { FIELDS, GROUPS, validate, tr, DISTRICTS, taluksFor, hoblisFor, EXAMPLE, type Row } from "@/lib/intake";
 
 export default function AddParcel() {
   const { lang } = useDemo();
   const who = useSubmitter();
+  const { offers, addOffer } = useOffers();
+  const [ref, setRef] = useState<string | null>(null);
   const en = lang === "en";
   const [data, setData] = useState<Row>({});
   const [tried, setTried] = useState(false);
@@ -52,6 +54,29 @@ export default function AddParcel() {
   const submit = () => {
     setTried(true);
     if (verdict.errors.length === 0) {
+      const dc = (scoped.district ?? "").slice(0, 3).toUpperCase();
+      const tc = (scoped.taluk ?? "").slice(0, 3).toUpperCase();
+      const newRef = `OFR-${dc}-${tc}-${String(70 + offers.length).padStart(4, "0")}`;
+      addOffer({
+        ref: newRef,
+        submittedOn: "today",
+        deptEn: who.deptEn, deptKn: who.deptKn,
+        submitterEn: who.en, submitterKn: who.kn,
+        district: scoped.district ?? "", districtKn: scoped.district ?? "",
+        taluk: scoped.taluk ?? "", talukKn: scoped.taluk ?? "",
+        hobli: scoped.hobli ?? "", village: scoped.village ?? "",
+        survey: scoped.survey ?? "—",
+        category: scoped.category ?? "", categoryKn: scoped.category ?? "",
+        rtc: Number(scoped.rtc) || 0, offered: Number(scoped.offered) || 0,
+        lat: Number(scoped.lat) || 0, lng: Number(scoped.lng) || 0,
+        terrain: scoped.terrain ?? "", vegetation: scoped.vegetation ?? "",
+        water: scoped.water ?? "", access: scoped.access ?? "",
+        encroach: scoped.encroach ?? "", dispute: scoped.dispute ?? "",
+        custodianProposed: scoped.custodian ?? "",
+        season: scoped.season ?? "",
+        state: "submitted",
+      });
+      setRef(newRef);
       setDone(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -62,9 +87,10 @@ export default function AddParcel() {
       {done && (
         <div className="ik-banner ok">
           <b>{tr("accepted", lang)}</b>
+          {tr("offerRef", lang)}: <strong>{ref}</strong>.{" "}
           {en
-            ? "State 1 — Identified. A verification officer will be assigned for the taluk."
-            : "ಸ್ಥಿತಿ 1 — ಗುರುತಿಸಲಾಗಿದೆ. ತಾಲ್ಲೂಕಿಗೆ ಪರಿಶೀಲನಾ ಅಧಿಕಾರಿಯನ್ನು ನಿಯೋಜಿಸಲಾಗುವುದು."}
+            ? "It is now at the top of the Register, awaiting a verification officer. No Location ID is issued yet."
+            : "ಈಗ ಅದು ನೋಂದಣಿಯ ಮೇಲ್ಭಾಗದಲ್ಲಿದೆ, ಪರಿಶೀಲನಾ ಅಧಿಕಾರಿಗಾಗಿ ಕಾಯುತ್ತಿದೆ. ಇನ್ನೂ ಲೊಕೇಶನ್ ಐಡಿ ನೀಡಿಲ್ಲ."}
         </div>
       )}
       {tried && verdict.errors.length > 0 && (

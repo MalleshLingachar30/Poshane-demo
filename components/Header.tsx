@@ -13,6 +13,8 @@ const NAV = [
   { href: "/console/state", key: "stateView" as const },
   { href: "/tags", key: "tags" as const },
   { href: "/intake", key: "landIntake" as const },
+  { href: "/intake/verify", key: "landVerify" as const },
+  { href: "/intake/plans", key: "landPlans" as const },
 ];
 
 export default function Header() {
