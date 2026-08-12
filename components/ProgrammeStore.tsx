@@ -99,6 +99,52 @@ export function ProgrammeProvider({ children }: { children: ReactNode }) {
     const plan = plans.find((p) => p.locationId === pl.locationId);
     const v = verifications.find((x) => x.locationId === pl.locationId);
     const o = offers.find((x) => x.ref === v?.ref);
+    const batch = batches.find((b) => b.locationId === pl.locationId);
+
+    // the evidence timeline, from the records that actually produced it
+    const events = [
+      {
+        kind: "planting" as const,
+        labelEn: "Planting recorded",
+        labelKn: "ನೆಡುವಿಕೆ ದಾಖಲಾಗಿದೆ",
+        date: pl.plantedOn,
+        metaEn: `${pl.planted.toLocaleString("en-IN")} planted by ${pl.agencyEn} · ${pl.photographs} photographs`,
+        metaKn: `${pl.agencyKn} ${pl.planted.toLocaleString("en-IN")} ನೆಟ್ಟಿದೆ · ${pl.photographs} ಛಾಯಾಚಿತ್ರಗಳು`,
+        cadreEn: "Implementing agency",
+        cadreKn: "ಅನುಷ್ಠಾನ ಸಂಸ್ಥೆ",
+        publicVisible: true,
+      },
+      ...(batch ? [{
+        kind: "verification" as const,
+        labelEn: "Seedlings received from the nursery",
+        labelKn: "ನರ್ಸರಿಯಿಂದ ಸಸಿಗಳು ಸ್ವೀಕೃತ",
+        date: batch.dispatchedOn,
+        metaEn: `${batch.total.toLocaleString("en-IN")} in ${batch.bag} from ${batch.nurseryName} · batch ${batch.id}`,
+        metaKn: `${batch.nurseryName} ಇಂದ ${batch.bag} ನಲ್ಲಿ ${batch.total.toLocaleString("en-IN")} · ಬ್ಯಾಚ್ ${batch.id}`,
+      }] : []),
+      ...(v ? [{
+        kind: "verification" as const,
+        labelEn: "Land verified and Location ID issued",
+        labelKn: "ಭೂಮಿ ಪರಿಶೀಲಿಸಿ ಲೊಕೇಶನ್ ಐಡಿ ನೀಡಲಾಗಿದೆ",
+        date: v.visitedOn,
+        metaEn: `Boundary walked by ${v.officerEn}`,
+        metaKn: `${v.officerKn} ಗಡಿ ನಡೆದಿದ್ದಾರೆ`,
+      }] : []),
+    ];
+
+    // the walked boundary, normalised into the map's own box
+    const pts = v?.walk?.points ?? [];
+    const xs = pts.map((q) => q[0]);
+    const ys = pts.map((q) => q[1]);
+    const w = xs.length ? Math.max(...xs) - Math.min(...xs) || 1e-6 : 1;
+    const h = ys.length ? Math.max(...ys) - Math.min(...ys) || 1e-6 : 1;
+    const polygon: [number, number][] = pts.length
+      ? pts.map((q) => [
+          22 + ((q[0] - Math.min(...xs)) / w) * 216,
+          110 - ((q[1] - Math.min(...ys)) / h) * 88,
+        ] as [number, number])
+      : [[70, 34], [184, 38], [180, 96], [74, 92]];
+
     return {
       id: pl.locationId,
       district: o?.district ?? plan?.district ?? "",
@@ -122,6 +168,8 @@ export function ProgrammeProvider({ children }: { children: ReactNode }) {
       verifiedByKn: v?.officerKn,
       planApprovedOn: plan?.reviewedOn,
       season: "Monsoon 2028",
+      events,
+      polygon,
     } as Parcel;
   });
 

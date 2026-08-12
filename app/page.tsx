@@ -16,6 +16,7 @@ export default function ScanEntry() {
 
   // a parcel planted a moment ago belongs here as much as one planted in 2027
   const PARCELS = useMemo(() => [...sessionParcels, ...ALL_PARCELS], [sessionParcels]);
+  const fresh = useMemo(() => new Set(sessionParcels.map((p) => p.id)), [sessionParcels]);
 
   const [district, setDistrict] = useState("");
   const [taluk, setTaluk] = useState("");
@@ -46,13 +47,20 @@ export default function ScanEntry() {
             p.taluk.toLowerCase().includes(needle) ||
             p.district.toLowerCase().includes(needle)),
       )
-      // public order is geographic, never worst-first
-      .sort((a, b) =>
-        a.district.localeCompare(b.district) ||
-        a.taluk.localeCompare(b.taluk) ||
-        a.id.localeCompare(b.id),
-      );
-  }, [PARCELS, district, taluk, q]);
+      // public order is geographic, never worst-first — but a parcel planted
+      // during this session goes to the top, or it lands beyond the visible
+      // rows and looks as though it was never recorded
+      .sort((a, b) => {
+        const an = fresh.has(a.id) ? 0 : 1;
+        const bn = fresh.has(b.id) ? 0 : 1;
+        return (
+          an - bn ||
+          a.district.localeCompare(b.district) ||
+          a.taluk.localeCompare(b.taluk) ||
+          a.id.localeCompare(b.id)
+        );
+      });
+  }, [PARCELS, district, taluk, q, fresh]);
 
   const list = filtered.slice(0, LIMIT);
   const dirty = district || taluk || q.trim();
@@ -121,7 +129,14 @@ export default function ScanEntry() {
           {list.map((p) => (
             <Link key={p.id} href={`/p/${p.id}`} className="row">
               <div className="grow">
-                <div className="mono">{p.id}</div>
+                <div className="mono">
+                  {p.id}
+                  {fresh.has(p.id) && (
+                    <em style={{ color: "var(--gold)", fontStyle: "normal", fontWeight: 600 }}>
+                      {" "}· {en ? "planted in this session" : "ಈ ಅವಧಿಯಲ್ಲಿ ನೆಡಲಾಗಿದೆ"}
+                    </em>
+                  )}
+                </div>
                 <div className="t">
                   {en
                     ? `${p.taluk} ${tr("taluk", lang)}, ${p.district}`
