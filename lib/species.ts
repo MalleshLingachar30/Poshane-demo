@@ -16,12 +16,20 @@ export type Model = {
   spacingEn: string;
   density: number;       // plants per hectare, or per km for linear models
   densityUnit: "ha" | "km";
+  /**
+   * How the ground is measured for this model. The three models quoted per
+   * kilometre are single- or double-row plantings along a line — a roadside,
+   * a canal bank, a compound boundary. Walking a ring around them and
+   * computing hectares would produce a number that means nothing.
+   */
+  capture: "area" | "line";
   note?: string;
 };
 
 export const MODELS: Model[] = [
   {
     key: "bund",
+    capture: "area",
     en: "Bund / Strip / Shelter belt / Hedge / Alley planting",
     kn: "ಬದು / ಪಟ್ಟಿ / ತಡೆಪಟ್ಟಿ / ಬೇಲಿ ನೆಡುವಿಕೆ",
     category: "NTFP",
@@ -32,6 +40,7 @@ export const MODELS: Model[] = [
   },
   {
     key: "block",
+    capture: "area",
     en: "Block / Cluster plantation",
     kn: "ಬ್ಲಾಕ್ / ಸಮೂಹ ನೆಡುತೋಪು",
     category: "Timber",
@@ -43,6 +52,7 @@ export const MODELS: Model[] = [
   },
   {
     key: "linear",
+    capture: "line",
     en: "Linear / Roadside / Canal bank plantation",
     kn: "ರೇಖೀಯ / ರಸ್ತೆ ಬದಿ / ಕಾಲುವೆ ದಂಡೆ",
     category: "NTFP / Timber",
@@ -53,6 +63,7 @@ export const MODELS: Model[] = [
   },
   {
     key: "gua",
+    capture: "line",
     en: "Greening of Urban Area",
     kn: "ನಗರ ಹಸಿರೀಕರಣ",
     category: "Flowering",
@@ -63,6 +74,7 @@ export const MODELS: Model[] = [
   },
   {
     key: "institution",
+    capture: "line",
     en: "School / Institute / Temple premises / Grave yard planting",
     kn: "ಶಾಲೆ / ಸಂಸ್ಥೆ / ದೇವಸ್ಥಾನ ಆವರಣ ನೆಡುವಿಕೆ",
     category: "Flowering / Shade / Fruit",
@@ -70,6 +82,7 @@ export const MODELS: Model[] = [
     spacingEn: "10 m × 10 m",
     density: 100,
     densityUnit: "km",
+    note: "A single row at 10 m spacing along a compound boundary — 100 to the kilometre.",
   },
 ];
 

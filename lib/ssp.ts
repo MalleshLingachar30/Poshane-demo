@@ -29,6 +29,8 @@ export type Ssp = {
   zoneKey: string;
   modelKey: string;
   areaHa: number;
+  lengthKm: number;
+  capture: "area" | "line";
   density: number;
   densityUnit: "ha" | "km";
   totalSaplings: number;
@@ -60,11 +62,14 @@ export function buildSsp(offer: Offer, v: Verification): Ssp {
   const modelKey = modelFor(offer.category);
   const m = MODELS.find((x) => x.key === modelKey)!;
   const area = Number(v.offered) || offer.offered;
+  const km = v.walk?.lengthKm ?? 0;
   const list = speciesFor(zoneKey, modelKey);
 
-  const total = m.densityUnit === "ha"
-    ? Math.round(m.density * area)
-    : Math.round(m.density * area);   // linear models are quoted per km of run
+  // quantity follows the way the ground was measured: hectares for a block or
+  // bund planting, kilometres of run for a line
+  const total = m.capture === "line"
+    ? Math.round(m.density * km)
+    : Math.round(m.density * area);
 
   // even split across the eligible list, rounded to whole saplings
   const per = list.length ? Math.floor(total / list.length) : 0;
@@ -95,7 +100,17 @@ export function buildSsp(offer: Offer, v: Verification): Ssp {
       en: "Steep slope recorded — contour planting and closer spacing may be appropriate.",
       kn: "ಕಡಿದಾದ ಇಳಿಜಾರು ದಾಖಲಾಗಿದೆ — ಸಮೋಚ್ಚ ರೇಖೆಯಲ್ಲಿ ಮತ್ತು ಹತ್ತಿರದ ಅಂತರದಲ್ಲಿ ನೆಡುವುದು ಸೂಕ್ತವಾಗಬಹುದು.",
     });
-  if (area < 0.5)
+  if (m.capture === "line" && km === 0)
+    notes.push({
+      en: "This is a linear planting but no centre-line was traced, so no quantity can be computed. The parcel needs a line trace before the plan is meaningful.",
+      kn: "ಇದು ರೇಖೀಯ ನೆಡುವಿಕೆ, ಆದರೆ ಕೇಂದ್ರ ರೇಖೆಯನ್ನು ದಾಖಲಿಸಿಲ್ಲ, ಆದ್ದರಿಂದ ಸಂಖ್ಯೆ ಲೆಕ್ಕಹಾಕಲಾಗದು. ಯೋಜನೆ ಅರ್ಥಪೂರ್ಣವಾಗಲು ರೇಖೆಯ ದಾಖಲೆ ಬೇಕು.",
+    });
+  if (m.capture === "line" && km > 0)
+    notes.push({
+      en: `Linear planting — ${km.toFixed(2)} km traced at ${v.walk?.widthM ?? 0} m width. Below the floor for satellite corroboration at any length; assured by ground evidence alone.`,
+      kn: `ರೇಖೀಯ ನೆಡುವಿಕೆ — ${v.walk?.widthM ?? 0} ಮೀ ಅಗಲದಲ್ಲಿ ${km.toFixed(2)} ಕಿಮೀ. ಯಾವ ಉದ್ದಕ್ಕೂ ಉಪಗ್ರಹ ಪರಿಶೀಲನೆಗೆ ಸಾಲದು; ನೆಲದ ಸಾಕ್ಷ್ಯದಿಂದ ಮಾತ್ರ ಖಾತ್ರಿ.`,
+    });
+  if (m.capture === "area" && area < 0.5)
     notes.push({
       en: "Under 0.5 ha — below the floor for satellite corroboration; assured by ground evidence alone.",
       kn: "0.5 ಹೆ.ಗಿಂತ ಕಡಿಮೆ — ಉಪಗ್ರಹ ಪರಿಶೀಲನೆಗೆ ಸಾಲದು; ನೆಲದ ಸಾಕ್ಷ್ಯದಿಂದ ಮಾತ್ರ ಖಾತ್ರಿ.",
@@ -110,6 +125,8 @@ export function buildSsp(offer: Offer, v: Verification): Ssp {
     zoneKey,
     modelKey,
     areaHa: area,
+    lengthKm: km,
+    capture: m.capture,
     density: m.density,
     densityUnit: m.densityUnit,
     totalSaplings: total,

@@ -69,7 +69,8 @@ export default function Plans() {
                   </span>
                   <span className="who">{p.village}, {p.taluk}</span>
                   <span className="sub">
-                    {en ? z.en : z.kn} · {en ? m.en : m.kn} · {p.areaHa.toFixed(2)} ha ·{" "}
+                    {en ? z.en : z.kn} · {en ? m.en : m.kn} ·{" "}
+                    {p.capture === "line" ? `${p.lengthKm.toFixed(2)} km` : `${p.areaHa.toFixed(2)} ha`} ·{" "}
                     {sspTotal(p).toLocaleString("en-IN")} {tr("saplings", lang)}
                   </span>
                 </span>
@@ -85,9 +86,20 @@ export default function Plans() {
                       <tr><td>{tr("bagSize", lang)}</td><td colSpan={2}>{m.bag} · {m.category}</td></tr>
                       <tr><td>{tr("planSpacing", lang)}</td><td colSpan={2}>
                         {m.spacingEn} = {m.density} {en ? `per ${m.densityUnit}` : `ಪ್ರತಿ ${m.densityUnit}`}
+                        {p.capture === "line" && (
+                          <span style={{ color: "var(--muted)" }}>
+                            {" "}· {p.lengthKm.toFixed(2)} km × {m.density} = {sspTotal(p).toLocaleString("en-IN")}
+                          </span>
+                        )}
                         {m.note && <span style={{ color: "var(--muted)" }}> · {m.note}</span>}
                       </td></tr>
-                      <tr><td>{tr("walkedArea", lang)}</td><td colSpan={2}>{p.areaHa.toFixed(2)} ha</td></tr>
+                      {p.capture === "line" ? (
+                        <tr><td>{tr("lengthTraced", lang)}</td><td colSpan={2}>
+                          {p.lengthKm.toFixed(2)} km · {p.areaHa.toFixed(2)} ha {en ? "strip" : "ಪಟ್ಟಿ"}
+                        </td></tr>
+                      ) : (
+                        <tr><td>{tr("walkedArea", lang)}</td><td colSpan={2}>{p.areaHa.toFixed(2)} ha</td></tr>
+                      )}
                     </tbody>
                   </table>
 

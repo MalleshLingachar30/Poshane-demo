@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { useDemo } from "@/components/DemoContext";
 import { tr, SUBMITTERS, scopeLabel, type Submitter } from "@/lib/intake";
 import { SEED_OFFERS, SEED_VERIFICATIONS, type Offer, type Verification } from "@/lib/offers";
 import { buildSsp, type Ssp } from "@/lib/ssp";
+import { seedDispatches, seedPlantings, type Batch, type Planting } from "@/lib/dispatch";
 
 const SubCtx = createContext<Submitter>(SUBMITTERS[0]);
 export const useSubmitter = () => useContext(SubCtx);
@@ -15,6 +16,10 @@ type Store = {
   offers: Offer[];
   verifications: Verification[];
   plans: Ssp[];
+  batches: Batch[];
+  plantings: Planting[];
+  addBatch: (b: Batch) => void;
+  addPlanting: (p: Planting) => void;
   addOffer: (o: Offer) => void;
   addVerification: (v: Verification) => void;
   setOfferState: (ref: string, state: Offer["state"]) => void;
@@ -22,13 +27,14 @@ type Store = {
   addPlan: (o: Offer, v: Verification) => void;
 };
 const StoreCtx = createContext<Store>({
-  offers: [], verifications: [], plans: [],
+  offers: [], verifications: [], plans: [], batches: [], plantings: [],
+  addBatch: () => {}, addPlanting: () => {},
   addOffer: () => {}, addVerification: () => {}, setOfferState: () => {},
   updatePlan: () => {}, addPlan: () => {},
 });
 export const useOffers = () => useContext(StoreCtx);
 
-type NavKey = "navAdd" | "navUpload" | "navRegister" | "navTemplate" | "navRecord" | "navVerifyReg" | "navCompare" | "navPlans" | "navReview" | "navNursery" | "navAllocation";
+type NavKey = "navAdd" | "navUpload" | "navRegister" | "navTemplate" | "navRecord" | "navVerifyReg" | "navCompare" | "navPlans" | "navReview" | "navNursery" | "navAllocation" | "navDispatch" | "navPlanting";
 
 const INTAKE_NAV: { href: string; key: NavKey }[] = [
   { href: "/intake", key: "navAdd" },
@@ -41,6 +47,11 @@ const VERIFY_NAV: { href: string; key: NavKey }[] = [
   { href: "/intake/verify", key: "navRecord" },
   { href: "/intake/verified", key: "navVerifyReg" },
   { href: "/intake/compare", key: "navCompare" },
+];
+
+const FIELD_NAV: { href: string; key: NavKey }[] = [
+  { href: "/intake/dispatch", key: "navDispatch" },
+  { href: "/intake/planting", key: "navPlanting" },
 ];
 
 const PLAN_NAV: { href: string; key: NavKey }[] = [
@@ -80,6 +91,24 @@ export default function IntakeShell({ children }: { children: ReactNode }) {
     }));
   });
 
+  const [batches, setBatches] = useState<Batch[]>([]);
+  const [plantings, setPlantings] = useState<Planting[]>([]);
+
+  // seeded once the plans exist, so the registers are not empty on first view
+  useEffect(() => {
+    if (batches.length === 0 && plans.length > 0) {
+      const seeded = seedDispatches(plans);
+      setBatches(seeded);
+      setPlantings(seedPlantings(seeded));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plans.length]);
+
+  const addBatch = (b: Batch) =>
+    setBatches((xs) => [{ ...b, isNew: true }, ...xs.filter((x) => x.id !== b.id)]);
+  const addPlanting = (p: Planting) =>
+    setPlantings((xs) => [{ ...p, isNew: true }, ...xs.filter((x) => x.locationId !== p.locationId)]);
+
   const updatePlan = (ref: string, patch: Partial<Ssp>) =>
     setPlans((xs) => xs.map((x) => (x.ref === ref ? { ...x, ...patch } : x)));
 
@@ -94,14 +123,17 @@ export default function IntakeShell({ children }: { children: ReactNode }) {
   const onIntakeForm = path === "/intake" || path === "/intake/upload";
 
   // Each section is a different activity, done by a different person.
+  const onField = ["/intake/dispatch", "/intake/planting"].includes(path);
   const onPlanning = ["/intake/plans", "/intake/review", "/intake/nursery", "/intake/allocation"].includes(path);
-  const onVerification = !onPlanning && (path.startsWith("/intake/verif") || path === "/intake/compare");
+  const onVerification = !onPlanning && !onField && (path.startsWith("/intake/verif") || path === "/intake/compare");
 
   const heading =
     path === "/intake/plans" ? "hPlans"
     : path === "/intake/review" ? "hReview"
     : path === "/intake/nursery" ? "hNursery"
     : path === "/intake/allocation" ? "hAllocation"
+    : path === "/intake/dispatch" ? "hDispatch"
+    : path === "/intake/planting" ? "hPlanting"
     : path === "/intake/compare" ? "hCompare"
     : onVerification ? "hVerify" : "hIntake";
   const lede =
@@ -109,13 +141,18 @@ export default function IntakeShell({ children }: { children: ReactNode }) {
     : path === "/intake/review" ? "ledeReview"
     : path === "/intake/nursery" ? "ledeNursery"
     : path === "/intake/allocation" ? "ledeAllocation"
+    : path === "/intake/dispatch" ? "ledeDispatch"
+    : path === "/intake/planting" ? "ledePlanting"
     : path === "/intake/compare" ? "ledeCompare"
     : onVerification ? "ledeVerify" : "ledeIntake";
-  const nav = onPlanning ? PLAN_NAV : onVerification ? VERIFY_NAV : INTAKE_NAV;
-  const navHead = onPlanning ? "grpPlans" : onVerification ? "grpVerify" : "grpIntake";
+  const nav = onField ? FIELD_NAV : onPlanning ? PLAN_NAV : onVerification ? VERIFY_NAV : INTAKE_NAV;
+  const navHead = onField ? "grpField" : onPlanning ? "grpPlans" : onVerification ? "grpVerify" : "grpIntake";
 
   return (
-    <StoreCtx.Provider value={{ offers, verifications, plans, addOffer, addVerification, setOfferState, updatePlan, addPlan }}>
+    <StoreCtx.Provider value={{
+      offers, verifications, plans, batches, plantings,
+      addBatch, addPlanting, addOffer, addVerification, setOfferState, updatePlan, addPlan,
+    }}>
       <main>
         <div className="ik-head">
           <h1 className="ik-title">{tr(heading, lang)}</h1>

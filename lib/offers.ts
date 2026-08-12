@@ -31,15 +31,20 @@ export type Found = {
  * The raw track is written once and never edited; the working polygon is the
  * simplified version every later check uses. Schematic G2.
  */
+export type WalkMode = "ring" | "line";
+
 export type Walk = {
-  points: [number, number][];   // [lng, lat] in walk order, ring closed
+  mode: WalkMode;
+  points: [number, number][];   // [lng, lat] in walk order; closed for a ring
   vertexCount: number;          // raw vertices before simplification
   gpsAccuracyM: number;
   deviceId: string;
   startedAt: string;
   endedAt: string;
   perimeterM: number;
-  areaHa: number;               // computed from the ring, never typed
+  areaHa: number;               // ring mode: computed from the ring, never typed
+  lengthKm: number;             // line mode: computed from the trace
+  widthM: number;               // line mode: the planted strip width, declared
   centroid: [number, number];
   geomVersion: number;          // increments if a boundary is ever re-walked
   simplifyToleranceM: number;
@@ -473,13 +478,13 @@ const WALK_CACHE = new Map<number, Walk>();
 function walkFor(s: Seed): Walk {
   const hit = WALK_CACHE.get(s.n);
   if (hit) return hit;
-  const w = makeWalk(
-    14.2 + s.n * 0.004,
-    76.4 + s.n * 0.006,
-    Number(s.found?.offered ?? s.offered),
-    `${s.t}${s.n}W`,
-    `VER-${({ ctd: "CTD", tum: "TUM", blg: "BLG" } as Record<string, string>)[s.d]}-${String(s.n).padStart(3, "0")}`,
-  );
+  const lat = 14.2 + s.n * 0.004;
+  const lng = 76.4 + s.n * 0.006;
+  const dev = `VER-${({ ctd: "CTD", tum: "TUM", blg: "BLG" } as Record<string, string>)[s.d]}-${String(s.n).padStart(3, "0")}`;
+  const isLine = s.cat === "road" || s.cat === "canal" || s.cat === "campus";
+  const w = isLine
+    ? makeLineWalk(lat, lng, 1.4 + (s.n % 5) * 0.6, s.cat === "campus" ? 6 : 5, `${s.t}${s.n}L`, dev)
+    : makeWalk(lat, lng, Number(s.found?.offered ?? s.offered), `${s.t}${s.n}W`, dev);
   WALK_CACHE.set(s.n, w);
   return w;
 }
@@ -553,6 +558,67 @@ function seeded(key: string): () => number {
  * In the field this comes from the handset; here it is derived so that every
  * seeded record carries actual coordinates rather than an assertion.
  */
+/**
+ * A centre-line trace. A roadside strip or a canal bank is a run, not an area:
+ * the officer walks the line and declares the planted width. Length in
+ * kilometres is what the linear planting models are quoted against.
+ */
+export function makeLineWalk(
+  lat: number,
+  lng: number,
+  approxKm: number,
+  widthM: number,
+  seedKey: string,
+  device: string,
+): Walk {
+  const r = seeded(seedKey);
+  const mPerDegLng = 111320 * Math.cos((lat * Math.PI) / 180);
+  const mPerDegLat = 110540;
+  const legs = 6 + Math.floor(r() * 5);
+  const legM = (approxKm * 1000) / legs;
+
+  const points: [number, number][] = [[+lng.toFixed(6), +lat.toFixed(6)]];
+  let bearing = r() * Math.PI * 2;
+  for (let i = 0; i < legs; i++) {
+    bearing += (r() - 0.5) * 0.5;            // a road bends, it does not zigzag
+    const last = points[points.length - 1];
+    points.push([
+      +(last[0] + (Math.sin(bearing) * legM) / mPerDegLng).toFixed(6),
+      +(last[1] + (Math.cos(bearing) * legM) / mPerDegLat).toFixed(6),
+    ]);
+  }
+
+  let lengthM = 0;
+  for (let i = 1; i < points.length; i++) {
+    const dx = (points[i][0] - points[i - 1][0]) * mPerDegLng;
+    const dy = (points[i][1] - points[i - 1][1]) * mPerDegLat;
+    lengthM += Math.sqrt(dx * dx + dy * dy);
+  }
+
+  const mid = points[Math.floor(points.length / 2)];
+  const mins = 22 + Math.floor(approxKm * 14);
+  const h = 9 + Math.floor(r() * 3);
+  const m0 = 5 + Math.floor(r() * 40);
+  const end = m0 + mins;
+
+  return {
+    mode: "line",
+    points,
+    vertexCount: 90 + Math.round(lengthM / 12),
+    gpsAccuracyM: 3 + Math.floor(r() * 4),
+    deviceId: device,
+    startedAt: `${String(h).padStart(2, "0")}:${String(m0 % 60).padStart(2, "0")}`,
+    endedAt: `${String(h + Math.floor(end / 60)).padStart(2, "0")}:${String(end % 60).padStart(2, "0")}`,
+    perimeterM: Math.round(lengthM),
+    areaHa: +((lengthM * widthM) / 10000).toFixed(2),   // the strip it occupies
+    lengthKm: +(lengthM / 1000).toFixed(2),
+    widthM,
+    centroid: mid,
+    geomVersion: 1,
+    simplifyToleranceM: 2.5,
+  };
+}
+
 export function makeWalk(
   lat: number,
   lng: number,
@@ -615,6 +681,7 @@ export function makeWalk(
   const end = m0 + mins;
 
   return {
+    mode: "ring",
     points,
     vertexCount: 120 + Math.round(areaHa * 47),
     gpsAccuracyM: 3 + Math.floor(r() * 4),
@@ -623,6 +690,8 @@ export function makeWalk(
     endedAt: `${String(h + Math.floor(end / 60)).padStart(2, "0")}:${String(end % 60).padStart(2, "0")}`,
     perimeterM: Math.round(perim),
     areaHa,
+    lengthKm: 0,
+    widthM: 0,
     centroid,
     geomVersion: 1,
     simplifyToleranceM: 2.5,

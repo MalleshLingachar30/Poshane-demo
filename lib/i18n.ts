@@ -170,6 +170,7 @@ export const t = {
   landIntake: { en: "Land intake", kn: "ಭೂಮಿ ಸ್ವೀಕೃತಿ" },
   landVerify: { en: "Land verification", kn: "ಭೂಮಿ ಪರಿಶೀಲನೆ" },
   landPlans: { en: "Species and nursery", kn: "ಪ್ರಭೇದ ಮತ್ತು ನರ್ಸರಿ" },
+  landField: { en: "Dispatch and planting", kn: "ಸಾಗಣೆ ಮತ್ತು ನೆಡುವಿಕೆ" },
   printSheet: { en: "Print sheet", kn: "ಹಾಳೆ ಮುದ್ರಿಸಿ" },
   scanMe: { en: "Scan to see this site", kn: "ಈ ಸ್ಥಳವನ್ನು ನೋಡಲು ಸ್ಕ್ಯಾನ್ ಮಾಡಿ" },
 

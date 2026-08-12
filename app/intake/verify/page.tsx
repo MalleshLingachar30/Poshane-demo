@@ -4,7 +4,8 @@ import { useMemo, useState } from "react";
 import { useDemo } from "@/components/DemoContext";
 import { useOffers } from "@/components/IntakeShell";
 import { tr, FIELDS } from "@/lib/intake";
-import { CADRE, runGate, makeWalk, ZONES, SOILS, DEPTHS, SLOPES, DRAINAGE, type Verification, type Walk } from "@/lib/offers";
+import { CADRE, runGate, makeWalk, makeLineWalk, ZONES, SOILS, DEPTHS, SLOPES, DRAINAGE, type Verification, type Walk } from "@/lib/offers";
+import { MODELS, modelFor } from "@/lib/species";
 import WalkMap from "@/components/WalkMap";
 
 const REASONS: [string, string][] = [
@@ -45,6 +46,8 @@ export default function RecordVisit() {
   const [address, setAddress] = useState("");
   const [landType, setLandType] = useState("");
   const [walk, setWalk] = useState<Walk | null>(null);
+  const [mode, setMode] = useState<"ring" | "line">("ring");
+  const [width, setWidth] = useState("5");
   const [decision, setDecision] = useState("");
   const [reason, setReason] = useState("");
   const [saved, setSaved] = useState<string | null>(null);
@@ -69,12 +72,19 @@ export default function RecordVisit() {
     setWaterDist(""); setAddress(""); setLandType(""); setWalk(null);
   };
 
+  // the land category already implies how this ground must be measured
+  const suggestedMode = (category: string): "ring" | "line" =>
+    MODELS.find((m) => m.key === modelFor(category))?.capture === "line" ? "line" : "ring";
+
   const pick = (r: string) => {
     clear();
     setSaved(null);
     setRef(r);
     const o = offers.find((x) => x.ref === r);
-    if (o) setCustody(o.custodianProposed);
+    if (o) {
+      setCustody(o.custodianProposed);
+      setMode(suggestedMode(o.category));
+    }
   };
 
   const fillExample = () => {
@@ -91,8 +101,10 @@ export default function RecordVisit() {
         ? "Boundary walked with the village accountant present. A rocky strip on the eastern edge was excluded."
         : "ಗ್ರಾಮ ಲೆಕ್ಕಾಧಿಕಾರಿ ಸಮ್ಮುಖದಲ್ಲಿ ಗಡಿ ನಡೆಯಲಾಗಿದೆ. ಪೂರ್ವ ಅಂಚಿನ ಬಂಡೆ ಪಟ್ಟಿಯನ್ನು ಹೊರಗಿಡಲಾಗಿದೆ.",
     );
-    setWalk(makeWalk(offer.lat, offer.lng, offer.offered * 0.94, offer.ref + "demo",
-      `VER-${officer.taluk.slice(0, 3).toUpperCase()}-014`));
+    const dev = `VER-${officer.taluk.slice(0, 3).toUpperCase()}-014`;
+    setWalk(mode === "line"
+      ? makeLineWalk(offer.lat, offer.lng, 2.6, Number(width) || 5, offer.ref + "demoL", dev)
+      : makeWalk(offer.lat, offer.lng, offer.offered * 0.94, offer.ref + "demo", dev));
     setZone("centdry"); setSoil("redloam"); setDepth("medium");
     setSlope("gentle"); setDrainage("well"); setWaterDist("620");
     setAddress(en
@@ -214,6 +226,24 @@ export default function RecordVisit() {
           <div className="ik-group">
             <h2>{tr("boundaryWalk", lang)}</h2>
             <p className="ik-note" style={{ marginTop: 0, marginBottom: 12 }}>{tr("walkIsInput", lang)}</p>
+
+            <div className="ik-field" style={{ maxWidth: 640, marginBottom: 14 }}>
+              <label>{tr("captureMode", lang)} <span className="req">{tr("required", lang)}</span></label>
+              <select value={mode} onChange={(e) => { setMode(e.target.value as "ring" | "line"); setWalk(null); }}>
+                <option value="ring">{tr("modeRing", lang)}</option>
+                <option value="line">{tr("modeLine", lang)}</option>
+              </select>
+              {mode === "line" && <div className="hint">{tr("modeNote", lang)}</div>}
+            </div>
+
+            {mode === "line" && (
+              <div className="ik-field" style={{ maxWidth: 260, marginBottom: 14 }}>
+                <label>{tr("stripWidth", lang)} <span className="req">{tr("required", lang)}</span></label>
+                <input value={width} inputMode="decimal"
+                       onChange={(e) => { setWidth(e.target.value); setWalk(null); }} />
+              </div>
+            )}
+
             <div className="ik-fields" style={{ maxWidth: 640 }}>
               <div className="ik-field">
                 <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -228,15 +258,24 @@ export default function RecordVisit() {
             <div className="ik-actions" style={{ borderTop: 0, paddingTop: 14 }}>
               <button
                 className={walk ? "ik-btn ghost" : "ik-btn"}
-                onClick={() =>
-                  setWalk(makeWalk(offer.lat, offer.lng, offer.offered,
-                    offer.ref + officer.key + (walk ? walk.geomVersion + 1 : ""),
-                    `VER-${officer.taluk.slice(0, 3).toUpperCase()}-014`))
-                }
+                onClick={() => {
+                  const dev = `VER-${officer.taluk.slice(0, 3).toUpperCase()}-014`;
+                  const seed = offer.ref + officer.key + mode + (walk ? "again" : "");
+                  setWalk(mode === "line"
+                    ? makeLineWalk(offer.lat, offer.lng, 1.8 + Math.random() * 1.6,
+                        Number(width) || 5, seed, dev)
+                    : makeWalk(offer.lat, offer.lng, offer.offered, seed, dev));
+                }}
               >
-                {walk ? tr("walkAgain", lang) : tr("recordWalk", lang)}
+                {walk
+                  ? (mode === "line" ? tr("traceAgain", lang) : tr("walkAgain", lang))
+                  : (mode === "line" ? tr("recordLine", lang) : tr("recordWalk", lang))}
               </button>
-              {walk && <span className="ik-done">✓ {tr("walkRecorded", lang)}</span>}
+              {walk && (
+                <span className="ik-done">
+                  ✓ {walk.mode === "line" ? tr("lineRecorded", lang) : tr("walkRecorded", lang)}
+                </span>
+              )}
             </div>
 
             {!walk ? (
@@ -249,8 +288,17 @@ export default function RecordVisit() {
                 <div>
                   <table className="ik-compare" style={{ marginTop: 0 }}>
                     <tbody>
-                      <tr><td>{tr("areaComputed", lang)}</td>
-                          <td><strong>{walk.areaHa.toFixed(2)} ha</strong></td></tr>
+                      {walk.mode === "line" ? (
+                        <>
+                          <tr><td>{tr("lengthTraced", lang)}</td>
+                              <td><strong>{walk.lengthKm.toFixed(2)} km</strong></td></tr>
+                          <tr><td>{tr("stripWidth", lang)}</td><td>{walk.widthM} m</td></tr>
+                          <tr><td>{tr("stripArea", lang)}</td><td>{walk.areaHa.toFixed(2)} ha</td></tr>
+                        </>
+                      ) : (
+                        <tr><td>{tr("areaComputed", lang)}</td>
+                            <td><strong>{walk.areaHa.toFixed(2)} ha</strong></td></tr>
+                      )}
                       <tr><td>{tr("walkPoints", lang)}</td><td>{walk.vertexCount.toLocaleString("en-IN")}</td></tr>
                       <tr><td>{tr("walkAccuracy", lang)}</td><td>±{walk.gpsAccuracyM} m</td></tr>
                       <tr><td>{tr("walkPerimeter", lang)}</td><td>{walk.perimeterM.toLocaleString("en-IN")} m</td></tr>
