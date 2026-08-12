@@ -5,6 +5,7 @@ import { SEED_OFFERS, SEED_VERIFICATIONS, type Offer, type Verification } from "
 import { buildSsp, type Ssp } from "@/lib/ssp";
 import { seedDispatches, seedPlantings, type Batch, type Planting } from "@/lib/dispatch";
 import type { Parcel } from "@/lib/data";
+import { SILVI_ZONES } from "@/lib/species";
 
 /**
  * The programme store sits at the root, not inside the intake module, because a
@@ -157,9 +158,11 @@ export function ProgrammeProvider({ children }: { children: ReactNode }) {
       saplings: pl.planted,
       speciesCount: pl.lines.filter((l) => l.planted > 0).length,
       zone: 0,
+      zoneLabel: SILVI_ZONES.find((z) => z.key === plan?.zoneKey)?.en,
       survival: 0,
       survivalCountedOn: "",
-      nextCensus: "Mar 2029",
+      // annual cycle: the first count comes the March after planting
+      nextCensus: `Mar ${Number((pl.plantedOn.match(/\d{4}/) ?? ["2028"])[0]) + 1}`,
       status: "active",
       offerRef: o?.ref,
       deptEn: o?.deptEn,

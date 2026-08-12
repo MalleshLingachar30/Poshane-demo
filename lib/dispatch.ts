@@ -105,8 +105,8 @@ export function seedDispatches(plans: Ssp[]): Batch[] {
       locationId: p.locationId,
       nurseryName: `${p.taluk} Range Nursery`,
       bag: '14" × 20"',
-      raisedSeason: "Raised 2026–27",
-      dispatchedOn: ["8 Jun 2027", "14 Jun 2027", "19 Jun 2027", "27 Jun 2027"][i],
+      raisedSeason: "Raised 2027–28",
+      dispatchedOn: ["8 Jun 2028", "14 Jun 2028", "19 Jun 2028", "27 Jun 2028"][i],
       receivedByEn: `Site supervisor, ${p.village}`,
       receivedByKn: `ಸ್ಥಳ ಮೇಲ್ವಿಚಾರಕ, ${p.village}`,
       vehicle: `KA ${16 + i} B ${4200 + i * 137}`,
@@ -130,7 +130,7 @@ export function seedPlantings(batches: Batch[]): Planting[] {
     const agency = AGENCIES[i % AGENCIES.length];
     return {
       locationId: b.locationId,
-      plantedOn: ["3 Jul 2027", "9 Jul 2027"][i],
+      plantedOn: ["3 Jul 2028", "9 Jul 2028"][i],
       agencyEn: agency.en,
       agencyKn: agency.kn,
       lines,

@@ -35,7 +35,7 @@ export default function Dispatch() {
       locationId: plan.locationId,
       nurseryName: `${plan.taluk} Range Nursery`,
       bag: '14" × 20"',
-      raisedSeason: "Raised 2026–27",
+      raisedSeason: "Raised 2027–28",
       dispatchedOn: en ? "today" : "ಇಂದು",
       receivedByEn: `Site supervisor, ${plan.village}`,
       receivedByKn: `ಸ್ಥಳ ಮೇಲ್ವಿಚಾರಕ, ${plan.village}`,

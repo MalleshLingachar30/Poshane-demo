@@ -70,7 +70,8 @@ export default function PublicRecord({ parcel: p }: { parcel: Parcel }) {
             <div className="k">{tr("saplingsPlanted", lang)}</div>
             <div className="v">{p.saplings.toLocaleString("en-IN")}</div>
             <div className="n">
-              {p.speciesCount} {tr("species", lang)} · {tr("zone", lang)} {p.zone}
+              {p.speciesCount} {tr("species", lang)}
+              {p.zoneLabel ? ` · ${p.zoneLabel}` : p.zone ? ` · ${tr("zone", lang)} ${p.zone}` : ""}
             </div>
           </div>
           <div className="metric">
