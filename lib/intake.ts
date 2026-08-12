@@ -528,8 +528,8 @@ export const T = {
   nothingToPlant: { en: "Nothing dispatched and awaiting planting.", kn: "ನೆಡುವಿಕೆಗೆ ಬಾಕಿ ಇರುವ ಸಾಗಣೆ ಇಲ್ಲ." },
   recordPlanting: { en: "Record the planting", kn: "ನೆಡುವಿಕೆ ದಾಖಲಿಸಿ" },
   plantedNow: {
-    en: "Planted. The parcel now carries a tag and appears in the public record — the same page a citizen reaches by scanning it.",
-    kn: "ನೆಡಲಾಗಿದೆ. ಈಗ ಜಮೀನಿಗೆ ಟ್ಯಾಗ್ ಇದೆ ಮತ್ತು ಸಾರ್ವಜನಿಕ ದಾಖಲೆಯಲ್ಲಿ ಕಾಣಿಸುತ್ತದೆ — ನಾಗರಿಕರು ಸ್ಕ್ಯಾನ್ ಮಾಡಿ ತಲುಪುವ ಪುಟವೇ ಇದು.",
+    en: "Planted. The parcel now carries a tag and appears in the public record for this session — the same page a citizen reaches by scanning it. This build has no database, so it cannot be served to a second device.",
+    kn: "ನೆಡಲಾಗಿದೆ. ಈಗ ಜಮೀನಿಗೆ ಟ್ಯಾಗ್ ಇದೆ ಮತ್ತು ಈ ಅವಧಿಯ ಸಾರ್ವಜನಿಕ ದಾಖಲೆಯಲ್ಲಿ ಕಾಣಿಸುತ್ತದೆ — ನಾಗರಿಕರು ಸ್ಕ್ಯಾನ್ ಮಾಡಿ ತಲುಪುವ ಪುಟವೇ ಇದು. ಈ ಆವೃತ್ತಿಗೆ ದತ್ತಸಂಚಯ ಇಲ್ಲದ ಕಾರಣ ಇನ್ನೊಂದು ಸಾಧನಕ್ಕೆ ನೀಡಲಾಗದು.",
   },
   gapNote: {
     en: "Seedlings that arrived but were not planted stay on the record with the reason. They are not quietly dropped from the count.",

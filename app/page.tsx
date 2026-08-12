@@ -5,12 +5,17 @@ import Link from "next/link";
 import { useDemo } from "@/components/DemoContext";
 import { tr } from "@/lib/i18n";
 import { ALL_PARCELS } from "@/lib/data";
+import { useOffers } from "@/components/ProgrammeStore";
 
 const LIMIT = 24;
 
 export default function ScanEntry() {
   const { lang } = useDemo();
   const en = lang === "en";
+  const { sessionParcels } = useOffers();
+
+  // a parcel planted a moment ago belongs here as much as one planted in 2027
+  const PARCELS = useMemo(() => [...sessionParcels, ...ALL_PARCELS], [sessionParcels]);
 
   const [district, setDistrict] = useState("");
   const [taluk, setTaluk] = useState("");
@@ -18,20 +23,20 @@ export default function ScanEntry() {
 
   const districts = useMemo(() => {
     const m = new Map<string, string>();
-    ALL_PARCELS.forEach((p) => m.set(p.district, p.districtKn));
+    PARCELS.forEach((p) => m.set(p.district, p.districtKn));
     return [...m.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-  }, []);
+  }, [PARCELS]);
 
   const taluks = useMemo(() => {
     const m = new Map<string, string>();
-    ALL_PARCELS.filter((p) => !district || p.district === district)
+    PARCELS.filter((p) => !district || p.district === district)
       .forEach((p) => m.set(p.taluk, p.talukKn));
     return [...m.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-  }, [district]);
+  }, [PARCELS, district]);
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    return ALL_PARCELS
+    return PARCELS
       .filter(
         (p) =>
           (!district || p.district === district) &&
@@ -47,7 +52,7 @@ export default function ScanEntry() {
         a.taluk.localeCompare(b.taluk) ||
         a.id.localeCompare(b.id),
       );
-  }, [district, taluk, q]);
+  }, [PARCELS, district, taluk, q]);
 
   const list = filtered.slice(0, LIMIT);
   const dirty = district || taluk || q.trim();
@@ -105,7 +110,7 @@ export default function ScanEntry() {
         <span className="filter-count">
           {dirty
             ? `${filtered.length} ${tr("matching", lang)}`
-            : `${tr("showingAll", lang)} ${ALL_PARCELS.length} ${tr("publicParcels", lang)}`}
+            : `${tr("showingAll", lang)} ${PARCELS.length} ${tr("publicParcels", lang)}`}
         </span>
       </div>
 

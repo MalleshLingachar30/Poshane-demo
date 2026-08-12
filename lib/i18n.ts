@@ -129,6 +129,10 @@ export const t = {
     kn: "ರಾಜ್ಯ ಮಟ್ಟದ ಒಟ್ಟು ನೋಟವನ್ನು ಎಲ್ಲಾ ಜಿಲ್ಲೆಗಳಿಂದ ರೂಪಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ಅದು ರಾಜ್ಯ ನಿಯಂತ್ರಣಕ್ಕೆ ಮಾತ್ರ ಲಭ್ಯ. ಜಿಲ್ಲಾ ಅಥವಾ ತಾಲ್ಲೂಕು ಅಧಿಕಾರಿಗೆ ತಮ್ಮ ವ್ಯಾಪ್ತಿಯ ಒಟ್ಟು ನೋಟ ನಿಯಂತ್ರಣ ಫಲಕದಲ್ಲಿ ಕಾಣಿಸುತ್ತದೆ.",
   },
   publicView: { en: "Open to anyone — no sign-in", kn: "ಎಲ್ಲರಿಗೂ ಮುಕ್ತ — ಪ್ರವೇಶ ಅಗತ್ಯವಿಲ್ಲ" },
+  noCensusYet: {
+    en: "no census yet — first count at the next cycle",
+    kn: "ಇನ್ನೂ ಗಣತಿ ಇಲ್ಲ — ಮುಂದಿನ ಚಕ್ರದಲ್ಲಿ ಮೊದಲ ಎಣಿಕೆ",
+  },
   howItGotHere: { en: "How this parcel came to be planted", kn: "ಈ ಜಮೀನು ಹೇಗೆ ನೆಡಲ್ಪಟ್ಟಿತು" },
   provOffered: { en: "offered this land, reference", kn: "ಈ ಭೂಮಿಯನ್ನು ನೀಡಿತು, ಉಲ್ಲೇಖ" },
   provWalked: { en: "The boundary was walked by", kn: "ಗಡಿಯನ್ನು ನಡೆದವರು" },

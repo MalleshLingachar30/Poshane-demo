@@ -2,37 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode } from "react";
 import { useDemo } from "@/components/DemoContext";
 import { tr, SUBMITTERS, scopeLabel, type Submitter } from "@/lib/intake";
-import { SEED_OFFERS, SEED_VERIFICATIONS, type Offer, type Verification } from "@/lib/offers";
-import { buildSsp, type Ssp } from "@/lib/ssp";
-import { seedDispatches, seedPlantings, type Batch, type Planting } from "@/lib/dispatch";
+export { useOffers } from "@/components/ProgrammeStore";
 
 const SubCtx = createContext<Submitter>(SUBMITTERS[0]);
 export const useSubmitter = () => useContext(SubCtx);
-
-type Store = {
-  offers: Offer[];
-  verifications: Verification[];
-  plans: Ssp[];
-  batches: Batch[];
-  plantings: Planting[];
-  addBatch: (b: Batch) => void;
-  addPlanting: (p: Planting) => void;
-  addOffer: (o: Offer) => void;
-  addVerification: (v: Verification) => void;
-  setOfferState: (ref: string, state: Offer["state"]) => void;
-  updatePlan: (ref: string, patch: Partial<Ssp>) => void;
-  addPlan: (o: Offer, v: Verification) => void;
-};
-const StoreCtx = createContext<Store>({
-  offers: [], verifications: [], plans: [], batches: [], plantings: [],
-  addBatch: () => {}, addPlanting: () => {},
-  addOffer: () => {}, addVerification: () => {}, setOfferState: () => {},
-  updatePlan: () => {}, addPlan: () => {},
-});
-export const useOffers = () => useContext(StoreCtx);
 
 type NavKey = "navAdd" | "navUpload" | "navRegister" | "navTemplate" | "navRecord" | "navVerifyReg" | "navCompare" | "navPlans" | "navReview" | "navNursery" | "navAllocation" | "navDispatch" | "navPlanting";
 
@@ -68,58 +44,8 @@ export default function IntakeShell({ children }: { children: ReactNode }) {
   const [key, setKey] = useState(SUBMITTERS[0].key);
   const who = SUBMITTERS.find((s) => s.key === key) ?? SUBMITTERS[0];
 
-  const [offers, setOffers] = useState<Offer[]>(SEED_OFFERS);
-  const [verifications, setVerifications] = useState<Verification[]>(SEED_VERIFICATIONS);
-
   // A plan exists only once a Location ID has been issued. Most arrive already
   // reviewed, so the demand statement below has something real to aggregate.
-  const [plans, setPlans] = useState<Ssp[]>(() => {
-    const seeded = SEED_VERIFICATIONS
-      .filter((v) => v.locationId)
-      .map((v) => {
-        const o = SEED_OFFERS.find((x) => x.ref === v.ref)!;
-        return buildSsp(o, v);
-      });
-    return seeded.map((p, i) => ({
-      ...p,
-      state: i % 5 === 4 ? "submitted" : i % 7 === 3 ? "returned" : "approved",
-      reviewerEn: i % 5 === 4 ? undefined : "Shri Ajay Mishra — Principal Scientific Advisor, IAFT",
-      reviewedOn: i % 5 === 4 ? undefined : "4 Jul 2026",
-      remarksEn: i % 7 === 3
-        ? "Shallow soil recorded. Substitute the deep-rooted species before resubmission."
-        : undefined,
-    }));
-  });
-
-  const [batches, setBatches] = useState<Batch[]>([]);
-  const [plantings, setPlantings] = useState<Planting[]>([]);
-
-  // seeded once the plans exist, so the registers are not empty on first view
-  useEffect(() => {
-    if (batches.length === 0 && plans.length > 0) {
-      const seeded = seedDispatches(plans);
-      setBatches(seeded);
-      setPlantings(seedPlantings(seeded));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [plans.length]);
-
-  const addBatch = (b: Batch) =>
-    setBatches((xs) => [{ ...b, isNew: true }, ...xs.filter((x) => x.id !== b.id)]);
-  const addPlanting = (p: Planting) =>
-    setPlantings((xs) => [{ ...p, isNew: true }, ...xs.filter((x) => x.locationId !== p.locationId)]);
-
-  const updatePlan = (ref: string, patch: Partial<Ssp>) =>
-    setPlans((xs) => xs.map((x) => (x.ref === ref ? { ...x, ...patch } : x)));
-
-  const addOffer = (o: Offer) => setOffers((xs) => [{ ...o, isNew: true }, ...xs]);
-  const addPlan = (o: Offer, v: Verification) =>
-    setPlans((xs) => [{ ...buildSsp(o, v), isNew: true }, ...xs.filter((x) => x.ref !== o.ref)]);
-  const addVerification = (v: Verification) =>
-    setVerifications((xs) => [{ ...v, isNew: true }, ...xs.filter((x) => x.ref !== v.ref)]);
-  const setOfferState = (ref: string, state: Offer["state"]) =>
-    setOffers((xs) => xs.map((x) => (x.ref === ref ? { ...x, state } : x)));
-
   const onIntakeForm = path === "/intake" || path === "/intake/upload";
 
   // Each section is a different activity, done by a different person.
@@ -149,11 +75,7 @@ export default function IntakeShell({ children }: { children: ReactNode }) {
   const navHead = onField ? "grpField" : onPlanning ? "grpPlans" : onVerification ? "grpVerify" : "grpIntake";
 
   return (
-    <StoreCtx.Provider value={{
-      offers, verifications, plans, batches, plantings,
-      addBatch, addPlanting, addOffer, addVerification, setOfferState, updatePlan, addPlan,
-    }}>
-      <main>
+    <main>
         <div className="ik-head">
           <h1 className="ik-title">{tr(heading, lang)}</h1>
         </div>
@@ -191,7 +113,6 @@ export default function IntakeShell({ children }: { children: ReactNode }) {
             <SubCtx.Provider value={who}>{children}</SubCtx.Provider>
           </div>
         </div>
-      </main>
-    </StoreCtx.Provider>
+    </main>
   );
 }

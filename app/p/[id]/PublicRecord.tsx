@@ -59,9 +59,11 @@ export default function PublicRecord({ parcel: p }: { parcel: Parcel }) {
         <div className="metrics">
           <div className="metric">
             <div className="k">{tr("survivalLast", lang)}</div>
-            <div className="v">{p.survival}%</div>
+            <div className="v">{p.survivalCountedOn ? `${p.survival}%` : "—"}</div>
             <div className="n">
-              {tr("countedOn", lang)} {p.survivalCountedOn}
+              {p.survivalCountedOn
+                ? `${tr("countedOn", lang)} ${p.survivalCountedOn}`
+                : tr("noCensusYet", lang)}
             </div>
           </div>
           <div className="metric">
