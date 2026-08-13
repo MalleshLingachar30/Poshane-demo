@@ -239,6 +239,7 @@ export function ProgrammeProvider({ children }: { children: ReactNode }) {
       season: "Monsoon 2028",
       events,
       polygon,
+      walk: v?.walk,
     } as Parcel;
   });
 

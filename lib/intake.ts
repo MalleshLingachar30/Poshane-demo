@@ -766,6 +766,10 @@ export const T = {
   walkCentroid: { en: "Centroid", kn: "ಕೇಂದ್ರ ಬಿಂದು" },
   walkVersion: { en: "Geometry version", kn: "ಗಡಿ ಆವೃತ್ತಿ" },
   walkTolerance: { en: "Simplification tolerance", kn: "ಸರಳೀಕರಣ ಸಹನೆ" },
+  satBackdrop: {
+    en: "The boundary is drawn over satellite imagery for orientation only. The imagery may be several years old, and young saplings are not visible from space until roughly the fourth year — bare ground here does not indicate failure. The coordinates in the record are the evidence; the picture behind them is a backdrop.",
+    kn: "ಗಡಿಯನ್ನು ಉಪಗ್ರಹ ಚಿತ್ರದ ಮೇಲೆ ದಿಕ್ಕರಿಯಲು ಮಾತ್ರ ಬಿಡಿಸಲಾಗಿದೆ. ಚಿತ್ರ ಹಲವು ವರ್ಷ ಹಳೆಯದಾಗಿರಬಹುದು, ಮತ್ತು ಎಳೆಯ ಸಸಿಗಳು ಸುಮಾರು ನಾಲ್ಕನೇ ವರ್ಷದವರೆಗೆ ಬಾಹ್ಯಾಕಾಶದಿಂದ ಕಾಣಿಸುವುದಿಲ್ಲ — ಇಲ್ಲಿ ಬರಿ ನೆಲ ಕಂಡರೆ ವಿಫಲತೆ ಎಂದಲ್ಲ. ದಾಖಲೆಯಲ್ಲಿನ ನಿರ್ದೇಶಾಂಕಗಳೇ ಸಾಕ್ಷ್ಯ; ಹಿಂದಿನ ಚಿತ್ರ ಕೇವಲ ಹಿನ್ನೆಲೆ.",
+  },
   walkRaw: {
     en: "The raw track is written once and never edited. A simplified working polygon is stored beside it, and that is what every later check runs against.",
     kn: "ನಡೆದ ಮೂಲ ಜಾಡನ್ನು ಒಮ್ಮೆ ಬರೆದು ಎಂದಿಗೂ ತಿದ್ದುವುದಿಲ್ಲ. ಅದರ ಪಕ್ಕದಲ್ಲಿ ಸರಳೀಕೃತ ಕಾರ್ಯ ಬಹುಭುಜ ಸಂಗ್ರಹವಾಗುತ್ತದೆ, ಮುಂದಿನ ಎಲ್ಲಾ ಪರಿಶೀಲನೆಗಳು ಅದರ ಮೇಲೆ ನಡೆಯುತ್ತವೆ.",

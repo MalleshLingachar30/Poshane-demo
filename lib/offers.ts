@@ -265,6 +265,29 @@ export const JOURNEY: { en: string; kn: string }[] = [
   { en: "Custody assigned, Location ID issued", kn: "ಪಾಲನೆ ನಿಗದಿ, ಲೊಕೇಶನ್ ಐಡಿ" },
 ];
 
+/**
+ * Real centres for the four demonstration taluks. The parcels themselves are
+ * illustrative, but they must at least sit in the taluk they claim: overlay
+ * satellite imagery on a generated coordinate and you show a real field that
+ * is not the parcel, which is worse than showing nothing.
+ */
+const TALUK_CENTRE: Record<string, [number, number]> = {
+  hsd: [13.7960, 76.2760],   // Hosadurga, Chitradurga
+  clk: [14.3180, 76.6520],   // Challakere, Chitradurga
+  sir: [13.7410, 76.9040],   // Sira, Tumakuru
+  svd: [15.7900, 75.3380],   // Savadatti, Belagavi
+};
+
+/** Scatters a parcel a few kilometres around its taluk centre, deterministically. */
+export function parcelPoint(taluk: string, n: number): [number, number] {
+  const [lat, lng] = TALUK_CENTRE[taluk] ?? [14.2, 76.4];
+  const r = seeded(`pt${taluk}${n}`);
+  return [
+    +(lat + (r() - 0.5) * 0.09).toFixed(6),
+    +(lng + (r() - 0.5) * 0.09).toFixed(6),
+  ];
+}
+
 const D = {
   ctd: ["Chitradurga", "ಚಿತ್ರದುರ್ಗ"],
   tum: ["Tumakuru", "ತುಮಕೂರು"],
@@ -455,7 +478,7 @@ function build(s: Seed): Offer {
     hobli, village, survey: s.survey,
     category: catEn, categoryKn: catKn,
     rtc: s.rtc, offered: s.offered,
-    lat: 14.2 + s.n * 0.004, lng: 76.4 + s.n * 0.006,
+    lat: parcelPoint(s.t, s.n)[0], lng: parcelPoint(s.t, s.n)[1],
     terrain: s.terrain, vegetation: s.veg, water: s.water, access: s.access,
     encroach: s.enc, dispute: s.disp,
     custodianProposed: `Gram Panchayat, ${village}`,
@@ -478,8 +501,7 @@ const WALK_CACHE = new Map<number, Walk>();
 function walkFor(s: Seed): Walk {
   const hit = WALK_CACHE.get(s.n);
   if (hit) return hit;
-  const lat = 14.2 + s.n * 0.004;
-  const lng = 76.4 + s.n * 0.006;
+  const [lat, lng] = parcelPoint(s.t, s.n);
   const dev = `VER-${({ ctd: "CTD", tum: "TUM", blg: "BLG" } as Record<string, string>)[s.d]}-${String(s.n).padStart(3, "0")}`;
   const isLine = s.cat === "road" || s.cat === "canal" || s.cat === "campus";
   const w = isLine

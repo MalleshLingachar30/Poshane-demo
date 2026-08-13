@@ -81,7 +81,8 @@ export type Parcel = {
   // enters today: a department offered it, an officer walked it, IAFT approved
   // a plan for it. Without these a 2027 parcel looks like it appeared by itself.
   offerRef?: string;
-  zoneLabel?: string;      // silvi zone by name, where an agro-climatic number is not held
+  zoneLabel?: string;
+  walk?: import("@/lib/offers").Walk;   // the officer's own track, for the imagery overlay      // silvi zone by name, where an agro-climatic number is not held
   deptEn?: string;
   deptKn?: string;
   verifiedByEn?: string;

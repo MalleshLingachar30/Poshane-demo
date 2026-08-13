@@ -6,6 +6,7 @@ import { useOffers } from "@/components/IntakeShell";
 import { tr } from "@/lib/intake";
 import { differences, nextLocationId, pairs } from "@/lib/offers";
 import WalkMap from "@/components/WalkMap";
+import ParcelSatellite from "@/components/ParcelSatellite";
 import { QRCodeSVG } from "qrcode.react";
 
 export default function Compare() {
@@ -130,7 +131,10 @@ export default function Compare() {
                       {v.notesEn && <p className="ik-line quote">{en ? v.notesEn : v.notesKn}</p>}
                       {v.walk && (
                         <div className="ik-split2" style={{ margin: "14px 0" }}>
-                          <div><WalkMap walk={v.walk} height={170} /></div>
+                          <div>
+                            <ParcelSatellite walk={v.walk} height={200} />
+                            <p className="ik-note" style={{ marginTop: 8 }}>{tr("satBackdrop", lang)}</p>
+                          </div>
                           <div>
                             <table className="ik-compare" style={{ marginTop: 0 }}>
                               <tbody>

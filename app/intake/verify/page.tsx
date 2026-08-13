@@ -7,6 +7,7 @@ import { tr, FIELDS } from "@/lib/intake";
 import { CADRE, runGate, makeWalk, makeLineWalk, ZONES, SOILS, DEPTHS, SLOPES, DRAINAGE, type Verification, type Walk } from "@/lib/offers";
 import { MODELS, modelFor } from "@/lib/species";
 import WalkMap from "@/components/WalkMap";
+import ParcelSatellite from "@/components/ParcelSatellite";
 
 const REASONS: [string, string][] = [
   ["Existing vegetation — tree cover already established", "ಈಗಿರುವ ಸಸ್ಯವರ್ಗ — ಈಗಾಗಲೇ ಮರಗಳಿವೆ"],
@@ -283,7 +284,8 @@ export default function RecordVisit() {
             ) : (
               <div className="ik-split2" style={{ marginTop: 14 }}>
                 <div>
-                  <WalkMap walk={walk} />
+                  <ParcelSatellite walk={walk} height={210} />
+                  <p className="ik-note" style={{ marginTop: 8 }}>{tr("satBackdrop", lang)}</p>
                 </div>
                 <div>
                   <table className="ik-compare" style={{ marginTop: 0 }}>

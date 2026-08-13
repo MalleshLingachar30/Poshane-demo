@@ -668,3 +668,98 @@ select.role {
   .brand-sub { font-size: 10.5px; }
   .brand-sub2 { font-size: 9px; letter-spacing: 0.12em; }
 }
+
+/* ---------- satellite backdrop ---------- */
+.sat { margin-top: 4px; }
+.sat-frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #223027;
+  border: 1px solid var(--line);
+}
+.sat-plane {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: center;
+  image-rendering: auto;
+}
+.sat-frame img { display: block; }
+.sat-zoom {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sat-zoom button {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(20, 30, 24, 0.72);
+  color: #fff;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+.sat-zoom button:hover { background: rgba(20, 30, 24, 0.92); }
+.sat-attr {
+  position: absolute;
+  right: 8px;
+  bottom: 7px;
+  font-size: 9.5px;
+  color: rgba(255, 255, 255, 0.82);
+  background: rgba(20, 30, 24, 0.55);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+.sat-offline {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-top: 8px;
+}
+@media print {
+  .sat-zoom { display: none; }
+}
+
+.sat-source {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  display: flex;
+  gap: 4px;
+}
+.sat-source button {
+  font-size: 10.5px;
+  padding: 4px 9px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(20, 30, 24, 0.65);
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+}
+.sat-source button.on {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #1F2430;
+  font-weight: 600;
+}
+.sat-zoom button:disabled { opacity: 0.35; cursor: default; }
+@media print { .sat-source { display: none; } }
+
+.sat-native {
+  position: absolute;
+  left: 10px;
+  bottom: 8px;
+  max-width: 58%;
+  font-size: 10px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(20, 30, 24, 0.62);
+  padding: 5px 9px;
+  border-radius: 5px;
+}

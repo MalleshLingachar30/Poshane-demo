@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useDemo } from "@/components/DemoContext";
 import ParcelMap from "@/components/ParcelMap";
+import ParcelSatellite from "@/components/ParcelSatellite";
 import EvidencePanel from "@/components/EvidencePanel";
 import { tr } from "@/lib/i18n";
 import type { Parcel } from "@/lib/data";
@@ -100,7 +101,11 @@ export default function PublicRecord({ parcel: p }: { parcel: Parcel }) {
           </div>
 
           <div>
-            <ParcelMap polygon={p.polygon} height={140} />
+            {p.walk ? (
+              <ParcelSatellite walk={p.walk} height={210} />
+            ) : (
+              <ParcelMap polygon={p.polygon} height={140} />
+            )}
             <p style={{ fontSize: 12, color: "var(--muted)", marginTop: 8, lineHeight: 1.55 }}>
               {tr("boundaryNote", lang)}
             </p>
