@@ -646,3 +646,25 @@ select.role {
 }
 .provenance ol { margin: 0 0 0 18px; padding: 0; }
 .provenance li { font-size: 12.5px; line-height: 1.75; }
+
+/* the programme owns the masthead; the platform sits beneath it */
+.brand-sub {
+  display: block;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  color: var(--navy);
+  font-weight: 600;
+  margin-top: 1px;
+}
+.brand-sub2 {
+  display: block;
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 2px;
+}
+@media (max-width: 520px) {
+  .brand-sub { font-size: 10.5px; }
+  .brand-sub2 { font-size: 9px; letter-spacing: 0.12em; }
+}

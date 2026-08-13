@@ -3,6 +3,10 @@ export type Lang = "en" | "kn";
 export const t = {
   brand: { en: "Poshane", kn: "ಪೋಷಣೆ" },
   brandSub: {
+    en: "KSLSA Five Crore Sapling Plantation Programme",
+    kn: "ಕೆಎಸ್‌ಎಲ್‌ಎಸ್‌ಎ ಐದು ಕೋಟಿ ಸಸಿ ನೆಡುವಿಕೆ ಕಾರ್ಯಕ್ರಮ",
+  },
+  brandSub2: {
     en: "Command & Control Center",
     kn: "ನಿಯಂತ್ರಣ ಮತ್ತು ನಿರ್ವಹಣಾ ಕೇಂದ್ರ",
   },

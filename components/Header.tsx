@@ -46,6 +46,7 @@ export default function Header() {
           <span className="brand-text">
             <span className="brand-mark">{tr("brand", lang)}</span>
             <span className="brand-sub">{tr("brandSub", lang)}</span>
+            <span className="brand-sub2">{tr("brandSub2", lang)}</span>
           </span>
         </Link>
 
