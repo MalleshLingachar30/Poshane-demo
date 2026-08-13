@@ -82,7 +82,8 @@ export type Parcel = {
   // a plan for it. Without these a 2027 parcel looks like it appeared by itself.
   offerRef?: string;
   zoneLabel?: string;
-  walk?: import("@/lib/offers").Walk;   // the officer's own track, for the imagery overlay      // silvi zone by name, where an agro-climatic number is not held
+  walk?: import("@/lib/offers").Walk;
+  sitePair?: import("@/components/SiteCompare").SitePair;   // the officer's own track, for the imagery overlay      // silvi zone by name, where an agro-climatic number is not held
   deptEn?: string;
   deptKn?: string;
   verifiedByEn?: string;

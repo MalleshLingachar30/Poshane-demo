@@ -240,6 +240,18 @@ export function ProgrammeProvider({ children }: { children: ReactNode }) {
       events,
       polygon,
       walk: v?.walk,
+      sitePair: {
+        locationId: pl.locationId,
+        bearing: "north-east",
+        station: "the survey peg at the north-west corner",
+        beforeLabelEn: "Before — at verification",
+        beforeLabelKn: "ಮೊದಲು — ಪರಿಶೀಲನೆಯ ವೇಳೆ",
+        beforeDate: v?.visitedOn ?? "",
+        afterLabelEn: census ? "After — at the survival census" : "After — at planting",
+        afterLabelKn: census ? "ನಂತರ — ಉಳಿವಿನ ಗಣತಿಯ ವೇಳೆ" : "ನಂತರ — ನೆಟ್ಟ ವೇಳೆ",
+        afterDate: census?.countedOn ?? pl.plantedOn,
+        afterKind: census ? "canopy" : "planted",
+      },
     } as Parcel;
   });
 

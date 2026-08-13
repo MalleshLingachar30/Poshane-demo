@@ -137,6 +137,7 @@ export const t = {
     en: "no census yet — first count at the next cycle",
     kn: "ಇನ್ನೂ ಗಣತಿ ಇಲ್ಲ — ಮುಂದಿನ ಚಕ್ರದಲ್ಲಿ ಮೊದಲ ಎಣಿಕೆ",
   },
+  beforeAfter: { en: "The same ground, before and after", kn: "ಅದೇ ನೆಲ, ಮೊದಲು ಮತ್ತು ನಂತರ" },
   howItGotHere: { en: "How this parcel came to be planted", kn: "ಈ ಜಮೀನು ಹೇಗೆ ನೆಡಲ್ಪಟ್ಟಿತು" },
   provOffered: { en: "offered this land, reference", kn: "ಈ ಭೂಮಿಯನ್ನು ನೀಡಿತು, ಉಲ್ಲೇಖ" },
   provWalked: { en: "The boundary was walked by", kn: "ಗಡಿಯನ್ನು ನಡೆದವರು" },

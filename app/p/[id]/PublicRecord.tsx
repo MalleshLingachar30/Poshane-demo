@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useDemo } from "@/components/DemoContext";
 import ParcelMap from "@/components/ParcelMap";
 import ParcelSatellite from "@/components/ParcelSatellite";
+import SiteCompare from "@/components/SiteCompare";
 import EvidencePanel from "@/components/EvidencePanel";
 import { tr } from "@/lib/i18n";
 import type { Parcel } from "@/lib/data";
@@ -111,6 +112,13 @@ export default function PublicRecord({ parcel: p }: { parcel: Parcel }) {
             </p>
           </div>
         </div>
+
+        {p.sitePair && (
+          <div style={{ marginTop: 20 }}>
+            <div className="ev-h">{tr("beforeAfter", lang)}</div>
+            <SiteCompare pair={p.sitePair} height={240} />
+          </div>
+        )}
 
         {p.offerRef && (
           <div className="provenance">
