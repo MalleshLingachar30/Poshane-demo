@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { SEED_OFFERS, SEED_VERIFICATIONS, type Offer, type Verification } from "@/lib/offers";
 import { buildSsp, type Ssp } from "@/lib/ssp";
 import { seedDispatches, seedPlantings, type Batch, type Planting } from "@/lib/dispatch";
+import type { Audit, Census, Rectification } from "@/lib/census";
 import type { Parcel } from "@/lib/data";
 import { SILVI_ZONES } from "@/lib/species";
 
@@ -30,6 +31,13 @@ type Store = {
   setOfferState: (ref: string, state: Offer["state"]) => void;
   updatePlan: (ref: string, patch: Partial<Ssp>) => void;
   addPlan: (o: Offer, v: Verification) => void;
+  censuses: Census[];
+  audits: Audit[];
+  rectifications: Rectification[];
+  addCensus: (c: Census) => void;
+  addAudit: (a: Audit) => void;
+  addRectification: (r: Rectification) => void;
+  closeRectification: (locationId: string, escalate: boolean) => void;
   /** Parcels planted during this session, shaped for the public record. */
   sessionParcels: Parcel[];
 };
@@ -38,7 +46,11 @@ const StoreCtx = createContext<Store>({
   offers: [], verifications: [], plans: [], batches: [], plantings: [],
   addBatch: () => {}, addPlanting: () => {},
   addOffer: () => {}, addVerification: () => {}, setOfferState: () => {},
-  updatePlan: () => {}, addPlan: () => {}, sessionParcels: [],
+  updatePlan: () => {}, addPlan: () => {},
+  censuses: [], audits: [], rectifications: [],
+  addCensus: () => {}, addAudit: () => {}, addRectification: () => {},
+  closeRectification: () => {},
+  sessionParcels: [],
 });
 
 export const useOffers = () => useContext(StoreCtx);
@@ -77,6 +89,7 @@ export function ProgrammeProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [plans.length]);
 
+
   const addOffer = (o: Offer) => setOffers((xs) => [{ ...o, isNew: true }, ...xs]);
   const addVerification = (v: Verification) =>
     setVerifications((xs) => [{ ...v, isNew: true }, ...xs.filter((x) => x.ref !== v.ref)]);
@@ -91,6 +104,26 @@ export function ProgrammeProvider({ children }: { children: ReactNode }) {
   const addPlanting = (p: Planting) =>
     setPlantings((xs) => [{ ...p, isNew: true }, ...xs.filter((x) => x.locationId !== p.locationId)]);
 
+  const [censuses, setCensuses] = useState<Census[]>([]);
+  const [audits, setAudits] = useState<Audit[]>([]);
+  const [rectifications, setRectifications] = useState<Rectification[]>([]);
+
+  const addCensus = (c: Census) =>
+    setCensuses((xs) => [{ ...c, isNew: true }, ...xs.filter((x) => x.locationId !== c.locationId)]);
+  const addAudit = (a: Audit) =>
+    setAudits((xs) => [{ ...a, isNew: true }, ...xs.filter((x) => x.locationId !== a.locationId)]);
+  const addRectification = (r: Rectification) =>
+    setRectifications((xs) => [{ ...r, isNew: true }, ...xs.filter((x) => x.locationId !== r.locationId)]);
+  const closeRectification = (locationId: string, escalate: boolean) =>
+    setRectifications((xs) => xs.map((x) => x.locationId === locationId
+      ? {
+          ...x,
+          state: escalate ? "escalated" : "closed",
+          escalatedToEn: escalate ? "District command — DFO" : undefined,
+          closedOn: escalate ? undefined : "today",
+        }
+      : x));
+
   /**
    * A planted parcel, assembled from the records that produced it. Survival is
    * deliberately absent — nothing has been counted yet, and showing a figure
@@ -101,9 +134,34 @@ export function ProgrammeProvider({ children }: { children: ReactNode }) {
     const v = verifications.find((x) => x.locationId === pl.locationId);
     const o = offers.find((x) => x.ref === v?.ref);
     const batch = batches.find((b) => b.locationId === pl.locationId);
+    const census = censuses.find((c) => c.locationId === pl.locationId);
+    const audit = audits.find((a) => a.locationId === pl.locationId);
+    const rect = rectifications.find((r) => r.locationId === pl.locationId && r.state !== "closed");
 
     // the evidence timeline, from the records that actually produced it
     const events = [
+      ...(census ? [{
+        kind: "census" as const,
+        labelEn: "Survival census, two signatures",
+        labelKn: "ಉಳಿವಿನ ಗಣತಿ, ಎರಡು ಸಹಿ",
+        date: census.countedOn,
+        metaEn: `${census.survival}% — ${census.surviving.toLocaleString("en-IN")} of ${census.planted.toLocaleString("en-IN")} · ${census.photographs} photographs`,
+        metaKn: `${census.survival}% — ${census.planted.toLocaleString("en-IN")} ರಲ್ಲಿ ${census.surviving.toLocaleString("en-IN")} · ${census.photographs} ಛಾಯಾಚಿತ್ರಗಳು`,
+        cadreEn: "Audit cadre — independent",
+        cadreKn: "ಲೆಕ್ಕಪರಿಶೋಧನಾ ದಳ — ಸ್ವತಂತ್ರ",
+        publicVisible: true,
+      }] : []),
+      ...(audit ? [{
+        kind: "audit" as const,
+        labelEn: audit.decision === "cleared" ? "Audit inspection, cleared" : "Audit inspection, flagged",
+        labelKn: audit.decision === "cleared" ? "ಲೆಕ್ಕಪರಿಶೋಧನೆ, ತೀರುವಳಿ" : "ಲೆಕ್ಕಪರಿಶೋಧನೆ, ಗುರುತಿಸಲಾಗಿದೆ",
+        date: audit.inspectedOn,
+        metaEn: `${audit.officerEn} · ${audit.photographs} photographs`,
+        metaKn: `${audit.officerKn} · ${audit.photographs} ಛಾಯಾಚಿತ್ರಗಳು`,
+        cadreEn: "Audit cadre — independent",
+        cadreKn: "ಲೆಕ್ಕಪರಿಶೋಧನಾ ದಳ — ಸ್ವತಂತ್ರ",
+        restricted: audit.decision === "flagged",
+      }] : []),
       {
         kind: "planting" as const,
         labelEn: "Planting recorded",
@@ -159,11 +217,19 @@ export function ProgrammeProvider({ children }: { children: ReactNode }) {
       speciesCount: pl.lines.filter((l) => l.planted > 0).length,
       zone: 0,
       zoneLabel: SILVI_ZONES.find((z) => z.key === plan?.zoneKey)?.en,
-      survival: 0,
-      survivalCountedOn: "",
+      survival: census?.survival ?? 0,
+      survivalCountedOn: census?.countedOn ?? "",
       // annual cycle: the first count comes the March after planting
       nextCensus: `Mar ${Number((pl.plantedOn.match(/\d{4}/) ?? ["2028"])[0]) + 1}`,
-      status: "active",
+      status: rect ? "rectification" : audit?.decision === "flagged" ? "flagged" : "active",
+      rectification: rect ? {
+        ownerEn: rect.ownerEn,
+        ownerKn: rect.ownerKn,
+        deadline: rect.deadline,
+        overdueDays: 0,
+        reasonEn: rect.reasonEn,
+        reasonKn: rect.reasonKn,
+      } : undefined,
       offerRef: o?.ref,
       deptEn: o?.deptEn,
       deptKn: o?.deptKn,
@@ -180,7 +246,10 @@ export function ProgrammeProvider({ children }: { children: ReactNode }) {
     <StoreCtx.Provider value={{
       offers, verifications, plans, batches, plantings,
       addBatch, addPlanting, addOffer, addVerification, setOfferState,
-      updatePlan, addPlan, sessionParcels,
+      updatePlan, addPlan,
+      censuses, audits, rectifications,
+      addCensus, addAudit, addRectification, closeRectification,
+      sessionParcels,
     }}>
       {children}
     </StoreCtx.Provider>

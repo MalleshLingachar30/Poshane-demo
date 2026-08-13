@@ -10,7 +10,7 @@ export { useOffers } from "@/components/ProgrammeStore";
 const SubCtx = createContext<Submitter>(SUBMITTERS[0]);
 export const useSubmitter = () => useContext(SubCtx);
 
-type NavKey = "navAdd" | "navUpload" | "navRegister" | "navTemplate" | "navRecord" | "navVerifyReg" | "navCompare" | "navPlans" | "navReview" | "navNursery" | "navAllocation" | "navDispatch" | "navPlanting";
+type NavKey = "navAdd" | "navUpload" | "navRegister" | "navTemplate" | "navRecord" | "navVerifyReg" | "navCompare" | "navPlans" | "navReview" | "navNursery" | "navAllocation" | "navDispatch" | "navPlanting" | "navCensus" | "navAudit";
 
 const INTAKE_NAV: { href: string; key: NavKey }[] = [
   { href: "/intake", key: "navAdd" },
@@ -28,6 +28,11 @@ const VERIFY_NAV: { href: string; key: NavKey }[] = [
 const FIELD_NAV: { href: string; key: NavKey }[] = [
   { href: "/intake/dispatch", key: "navDispatch" },
   { href: "/intake/planting", key: "navPlanting" },
+];
+
+const CENSUS_NAV: { href: string; key: NavKey }[] = [
+  { href: "/intake/census", key: "navCensus" },
+  { href: "/intake/audit", key: "navAudit" },
 ];
 
 const PLAN_NAV: { href: string; key: NavKey }[] = [
@@ -49,9 +54,10 @@ export default function IntakeShell({ children }: { children: ReactNode }) {
   const onIntakeForm = path === "/intake" || path === "/intake/upload";
 
   // Each section is a different activity, done by a different person.
+  const onCensus = ["/intake/census", "/intake/audit"].includes(path);
   const onField = ["/intake/dispatch", "/intake/planting"].includes(path);
-  const onPlanning = ["/intake/plans", "/intake/review", "/intake/nursery", "/intake/allocation"].includes(path);
-  const onVerification = !onPlanning && !onField && (path.startsWith("/intake/verif") || path === "/intake/compare");
+  const onPlanning = !onCensus && ["/intake/plans", "/intake/review", "/intake/nursery", "/intake/allocation"].includes(path);
+  const onVerification = !onPlanning && !onField && !onCensus && (path.startsWith("/intake/verif") || path === "/intake/compare");
 
   const heading =
     path === "/intake/plans" ? "hPlans"
@@ -60,6 +66,8 @@ export default function IntakeShell({ children }: { children: ReactNode }) {
     : path === "/intake/allocation" ? "hAllocation"
     : path === "/intake/dispatch" ? "hDispatch"
     : path === "/intake/planting" ? "hPlanting"
+    : path === "/intake/census" ? "hCensus"
+    : path === "/intake/audit" ? "hAudit"
     : path === "/intake/compare" ? "hCompare"
     : onVerification ? "hVerify" : "hIntake";
   const lede =
@@ -69,10 +77,12 @@ export default function IntakeShell({ children }: { children: ReactNode }) {
     : path === "/intake/allocation" ? "ledeAllocation"
     : path === "/intake/dispatch" ? "ledeDispatch"
     : path === "/intake/planting" ? "ledePlanting"
+    : path === "/intake/census" ? "ledeCensus"
+    : path === "/intake/audit" ? "ledeAudit"
     : path === "/intake/compare" ? "ledeCompare"
     : onVerification ? "ledeVerify" : "ledeIntake";
-  const nav = onField ? FIELD_NAV : onPlanning ? PLAN_NAV : onVerification ? VERIFY_NAV : INTAKE_NAV;
-  const navHead = onField ? "grpField" : onPlanning ? "grpPlans" : onVerification ? "grpVerify" : "grpIntake";
+  const nav = onCensus ? CENSUS_NAV : onField ? FIELD_NAV : onPlanning ? PLAN_NAV : onVerification ? VERIFY_NAV : INTAKE_NAV;
+  const navHead = onCensus ? "grpCensus" : onField ? "grpField" : onPlanning ? "grpPlans" : onVerification ? "grpVerify" : "grpIntake";
 
   return (
     <main>

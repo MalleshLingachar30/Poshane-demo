@@ -16,6 +16,7 @@ const NAV = [
   { href: "/intake/verify", key: "landVerify" as const },
   { href: "/intake/plans", key: "landPlans" as const },
   { href: "/intake/dispatch", key: "landField" as const },
+  { href: "/intake/census", key: "landCensus" as const },
 ];
 
 export default function Header() {
