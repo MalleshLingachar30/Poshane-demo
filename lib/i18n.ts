@@ -175,11 +175,7 @@ export const t = {
     kn: "ಈ ಹಾಳೆಯನ್ನು ಮುದ್ರಿಸಿ ಪ್ರತಿ ಸ್ಥಳದಲ್ಲಿ ಟ್ಯಾಗ್ ಇರಿಸಿ. ಸ್ಕ್ಯಾನ್ ಮಾಡಿದರೆ ಸಾರ್ವಜನಿಕ ದಾಖಲೆ ತೆರೆಯುತ್ತದೆ — ಎನ್‌ಎಫ್‌ಸಿ ಸ್ಪರ್ಶವೂ ಇದೇ ಪುಟವನ್ನು ತೆರೆಯುತ್ತದೆ.",
   },
   tags: { en: "Tags", kn: "ಟ್ಯಾಗ್‌ಗಳು" },
-  landIntake: { en: "Land intake", kn: "ಭೂಮಿ ಸ್ವೀಕೃತಿ" },
-  landVerify: { en: "Land verification", kn: "ಭೂಮಿ ಪರಿಶೀಲನೆ" },
-  landPlans: { en: "Species and nursery", kn: "ಪ್ರಭೇದ ಮತ್ತು ನರ್ಸರಿ" },
-  landField: { en: "Dispatch and planting", kn: "ಸಾಗಣೆ ಮತ್ತು ನೆಡುವಿಕೆ" },
-  landCensus: { en: "Census and audit", kn: "ಗಣತಿ ಮತ್ತು ಲೆಕ್ಕಪರಿಶೋಧನೆ" },
+  workflow: { en: "Programme workflow", kn: "ಕಾರ್ಯಕ್ರಮದ ಹಂತಗಳು" },
   printSheet: { en: "Print sheet", kn: "ಹಾಳೆ ಮುದ್ರಿಸಿ" },
   scanMe: { en: "Scan to see this site", kn: "ಈ ಸ್ಥಳವನ್ನು ನೋಡಲು ಸ್ಕ್ಯಾನ್ ಮಾಡಿ" },
 

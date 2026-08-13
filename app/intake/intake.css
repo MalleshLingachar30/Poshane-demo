@@ -32,8 +32,8 @@
 
 .ik-body {
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: 30px;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 32px;
   align-items: start;
 }
 @media (max-width: 760px) {
@@ -43,19 +43,6 @@
 .ik-side {
   display: block;
   border-left: 2px solid var(--line);
-}
-.ik-side-group {
-  display: block;
-  margin-bottom: 18px;
-}
-.ik-side-head {
-  display: block;
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--gold);
-  font-weight: 700;
-  padding: 0 0 7px 14px;
 }
 .ik-side a {
   display: block;
@@ -499,3 +486,70 @@
   margin-top: 10px;
   line-height: 1.5;
 }
+
+/* the pipeline shown whole: the current stage is lit, the rest stay legible */
+.ik-side-head .n {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  align-self: center;
+  border-radius: 50%;
+  background: var(--line);
+  color: var(--muted);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0;
+  flex: 0 0 auto;
+}
+
+/* a stage not in hand is inactive, not unavailable — it must not read as
+   disabled on a projector, so it keeps ink-weight contrast */
+
+a.ik-side-group.here > a
+
+/* ---------- the pipeline rail ----------
+   Stated once. Six overlapping rules had accumulated here across edits, which
+   is how the headings ended up uppercase, wide-tracked and wrapping in a
+   240px column. */
+.ik-side-group {
+  display: block;
+  padding-bottom: 2px;
+}
+.ik-side-group + .ik-side-group { margin-top: 14px; }
+
+a.ik-side-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 0 7px 14px;
+  margin-left: -2px;
+  border-left: 2px solid transparent;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.3;
+  text-transform: none;
+  text-decoration: none;
+  color: #5A6070;
+}
+a.ik-side-head .n {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--line);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0;
+  flex: 0 0 auto;
+}
+a.ik-side-head:hover { color: var(--green); }
+a.ik-side-head:hover .n { background: var(--gold); color: #fff; }
+
+.ik-side-group.here > a.ik-side-head { color: var(--green); }
+.ik-side-group.here > a.ik-side-head .n { background: var(--green); color: #fff; }

@@ -10,36 +10,56 @@ export { useOffers } from "@/components/ProgrammeStore";
 const SubCtx = createContext<Submitter>(SUBMITTERS[0]);
 export const useSubmitter = () => useContext(SubCtx);
 
-type NavKey = "navAdd" | "navUpload" | "navRegister" | "navTemplate" | "navRecord" | "navVerifyReg" | "navCompare" | "navPlans" | "navReview" | "navNursery" | "navAllocation" | "navDispatch" | "navPlanting" | "navCensus" | "navAudit";
+type NavKey = "stage1" | "stage2" | "stage3" | "stage4" | "stage5" | "navAdd" | "navUpload" | "navRegister" | "navTemplate" | "navRecord" | "navVerifyReg" | "navCompare" | "navPlans" | "navReview" | "navNursery" | "navAllocation" | "navDispatch" | "navPlanting" | "navCensus" | "navAudit";
 
-const INTAKE_NAV: { href: string; key: NavKey }[] = [
-  { href: "/intake", key: "navAdd" },
-  { href: "/intake/upload", key: "navUpload" },
-  { href: "/intake/register", key: "navRegister" },
-  { href: "/intake/template", key: "navTemplate" },
-];
-
-const VERIFY_NAV: { href: string; key: NavKey }[] = [
-  { href: "/intake/verify", key: "navRecord" },
-  { href: "/intake/verified", key: "navVerifyReg" },
-  { href: "/intake/compare", key: "navCompare" },
-];
-
-const FIELD_NAV: { href: string; key: NavKey }[] = [
-  { href: "/intake/dispatch", key: "navDispatch" },
-  { href: "/intake/planting", key: "navPlanting" },
-];
-
-const CENSUS_NAV: { href: string; key: NavKey }[] = [
-  { href: "/intake/census", key: "navCensus" },
-  { href: "/intake/audit", key: "navAudit" },
-];
-
-const PLAN_NAV: { href: string; key: NavKey }[] = [
-  { href: "/intake/plans", key: "navPlans" },
-  { href: "/intake/review", key: "navReview" },
-  { href: "/intake/nursery", key: "navNursery" },
-  { href: "/intake/allocation", key: "navAllocation" },
+/**
+ * The five stages are not peers of one another the way "Tags" and "Public
+ * record" are — they are consecutive steps in one pipeline. Showing them as
+ * separate top-level menus hid that, and put nine items in a row that wrapped.
+ * Numbered and shown whole, the sidebar becomes the story: an officer can see
+ * the entire process and where in it they are standing.
+ */
+const STAGES: { head: string; items: { href: string; key: NavKey }[] }[] = [
+  {
+    head: "stage1",
+    items: [
+      { href: "/intake", key: "navAdd" },
+      { href: "/intake/upload", key: "navUpload" },
+      { href: "/intake/register", key: "navRegister" },
+      { href: "/intake/template", key: "navTemplate" },
+    ],
+  },
+  {
+    head: "stage2",
+    items: [
+      { href: "/intake/verify", key: "navRecord" },
+      { href: "/intake/verified", key: "navVerifyReg" },
+      { href: "/intake/compare", key: "navCompare" },
+    ],
+  },
+  {
+    head: "stage3",
+    items: [
+      { href: "/intake/plans", key: "navPlans" },
+      { href: "/intake/review", key: "navReview" },
+      { href: "/intake/nursery", key: "navNursery" },
+      { href: "/intake/allocation", key: "navAllocation" },
+    ],
+  },
+  {
+    head: "stage4",
+    items: [
+      { href: "/intake/dispatch", key: "navDispatch" },
+      { href: "/intake/planting", key: "navPlanting" },
+    ],
+  },
+  {
+    head: "stage5",
+    items: [
+      { href: "/intake/census", key: "navCensus" },
+      { href: "/intake/audit", key: "navAudit" },
+    ],
+  },
 ];
 
 export default function IntakeShell({ children }: { children: ReactNode }) {
@@ -81,8 +101,7 @@ export default function IntakeShell({ children }: { children: ReactNode }) {
     : path === "/intake/audit" ? "ledeAudit"
     : path === "/intake/compare" ? "ledeCompare"
     : onVerification ? "ledeVerify" : "ledeIntake";
-  const nav = onCensus ? CENSUS_NAV : onField ? FIELD_NAV : onPlanning ? PLAN_NAV : onVerification ? VERIFY_NAV : INTAKE_NAV;
-  const navHead = onCensus ? "grpCensus" : onField ? "grpField" : onPlanning ? "grpPlans" : onVerification ? "grpVerify" : "grpIntake";
+  const activeStage = STAGES.findIndex((g) => g.items.some((i) => i.href === path));
 
   return (
     <main>
@@ -110,14 +129,24 @@ export default function IntakeShell({ children }: { children: ReactNode }) {
 
         <div className="ik-body">
           <nav className="ik-side">
-            <div className="ik-side-group">
-              <div className="ik-side-head">{tr(navHead, lang)}</div>
-              {nav.map((n) => (
-                <Link key={n.href} href={n.href} className={path === n.href ? "on" : ""}>
-                  {tr(n.key, lang)}
-                </Link>
-              ))}
-            </div>
+            {STAGES.map((g, i) => {
+              const here = i === activeStage;
+              return (
+                <div key={g.head} className={`ik-side-group${here ? " here" : ""}`}>
+                  {/* only the stage in hand opens; the rest stay as headings so
+                      the whole sequence is visible without scrolling */}
+                  <Link href={g.items[0].href} className="ik-side-head">
+                    <span className="n">{i + 1}</span>
+                    {tr(g.head as NavKey, lang)}
+                  </Link>
+                  {here && g.items.map((n) => (
+                    <Link key={n.href} href={n.href} className={path === n.href ? "on" : ""}>
+                      {tr(n.key, lang)}
+                    </Link>
+                  ))}
+                </div>
+              );
+            })}
           </nav>
           <div className="ik-main">
             <SubCtx.Provider value={who}>{children}</SubCtx.Provider>
