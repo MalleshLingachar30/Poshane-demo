@@ -3,6 +3,8 @@
 import { useDemo } from "@/components/DemoContext";
 import EvidenceSpecimen from "@/components/EvidenceSpecimen";
 import SatellitePair from "@/components/SatellitePair";
+import VisitLinkage from "@/components/VisitLinkage";
+import { VISITS } from "@/lib/satellite";
 import type { PassResult } from "@/lib/passes";
 
 /**
@@ -21,6 +23,7 @@ export default function EvidenceView({ passes }: { passes: PassResult }) {
       </h1>
       <EvidenceSpecimen />
       <SatellitePair passes={passes} />
+      {passes.ok && <VisitLinkage visits={VISITS} passes={passes.passes} />}
     </main>
   );
 }

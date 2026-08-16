@@ -93,3 +93,35 @@ export type Pass = {
   level: string;
   productId: string;
 };
+
+/**
+ * The visits put to the catalogue in the third panel.
+ *
+ * These are not chosen to flatter. Two of the three fall in the monsoon and
+ * cannot be corroborated from orbit at all; they are here precisely because
+ * they fail. Each date is the capture date of a photograph shown further up
+ * the page, so a reader can check one panel against the other.
+ */
+export const VISITS = [
+  {
+    date: "2024-06-15",
+    labelEn: "Planting",
+    labelKn: "ನೆಡುವಿಕೆ",
+    kindEn: "monsoon — the season planting must happen in",
+    kindKn: "ಮಳೆಗಾಲ — ನೆಡುವಿಕೆ ನಡೆಯಲೇಬೇಕಾದ ಋತು",
+  },
+  {
+    date: "2025-04-01",
+    labelEn: "Field visit",
+    labelKn: "ಕ್ಷೇತ್ರ ಭೇಟಿ",
+    kindEn: "dry season — when the annual count falls",
+    kindKn: "ಬೇಸಿಗೆ — ವಾರ್ಷಿಕ ಗಣತಿ ನಡೆಯುವ ಕಾಲ",
+  },
+  {
+    date: "2026-08-08",
+    labelEn: "Audit inspection",
+    labelKn: "ಲೆಕ್ಕಪರಿಶೋಧನಾ ಭೇಟಿ",
+    kindEn: "monsoon",
+    kindKn: "ಮಳೆಗಾಲ",
+  },
+];
