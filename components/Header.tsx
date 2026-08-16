@@ -13,6 +13,7 @@ const NAV = [
   { href: "/console/state", key: "stateView" as const },
   { href: "/tags", key: "tags" as const },
   { href: "/intake", key: "workflow" as const },
+  { href: "/evidence", key: "evidenceSpec" as const },
 ];
 
 export default function Header() {

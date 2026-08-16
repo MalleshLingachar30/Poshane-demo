@@ -829,3 +829,190 @@ select.role {
   font-weight: 700;
   margin-bottom: 8px;
 }
+
+/* ---- evidence specimen -------------------------------------------------- */
+/* A photograph beside its own metadata. Deliberately not styled like a parcel
+   record: this is a specimen, and it should not be mistaken for programme data. */
+
+.spec-lede {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink);
+  max-width: 62ch;
+  margin: 4px 0 16px;
+}
+.spec-provenance {
+  border-left: 3px solid var(--gold, #c09a3e);
+  background: rgba(192, 154, 62, 0.07);
+  padding: 11px 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+  max-width: 78ch;
+  margin-bottom: 20px;
+}
+.spec-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 18px;
+}
+.spec-card {
+  margin: 0;
+  border: 1px solid var(--line, #ddd6c6);
+  background: #fff;
+  border-radius: 3px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.spec-card img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+  background: #ece7db;
+}
+.spec-card figcaption { padding: 11px 13px 13px; }
+.spec-cap {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 9px;
+}
+.spec-meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3px 12px;
+  margin: 0;
+  font-size: 11.5px;
+}
+.spec-meta dt { color: var(--muted); white-space: nowrap; }
+.spec-meta dd { margin: 0; color: var(--ink); }
+.spec-meta dd.mono { font-variant-numeric: tabular-nums; font-size: 11px; }
+.spec-meta dd.dim { color: var(--muted); }
+.spec-check {
+  margin: 10px 0 0;
+  padding-top: 9px;
+  border-top: 1px dotted var(--line, #ddd6c6);
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.spec-check.ok::before {
+  content: "✓ ";
+  color: #1c5a33;
+  font-weight: 700;
+}
+.spec-toggle {
+  margin-top: 18px;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: 13px;
+  color: #27467a;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.spec-limit {
+  margin-top: 10px;
+  border-left: 2px solid var(--line, #ddd6c6);
+  padding: 2px 0 2px 14px;
+  max-width: 70ch;
+}
+.spec-limit p {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--muted);
+  margin: 0 0 9px;
+}
+
+/* ---- satellite pair ----------------------------------------------------- */
+.sat { margin-top: 34px; padding-top: 26px; border-top: 1px solid var(--line, #ddd6c6); }
+.sat-h {
+  font-family: var(--serif, Georgia, serif);
+  font-size: 21px;
+  color: var(--forest, #1c5a33);
+  margin: 0 0 8px;
+}
+.sat-lede {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--ink);
+  max-width: 62ch;
+  margin: 0 0 18px;
+}
+.sat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+  max-width: 760px;
+}
+.sat-card { margin: 0; border: 1px solid var(--line, #ddd6c6); background: #fff; }
+.sat-frame { position: relative; aspect-ratio: 1 / 1; background: #e4e0d4; }
+.sat-frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sat-outline { position: absolute; inset: 0; width: 100%; height: 100%; }
+.sat-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px dashed #b9b2a0;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+  padding: 12px;
+}
+.sat-empty span { font-size: 11px; font-family: ui-monospace, monospace; opacity: 0.7; }
+.sat-card figcaption { padding: 10px 12px 12px; }
+.sat-cap { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+.sat-date { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+.sat-cloud { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+.sat-attrib { font-size: 11px; color: var(--muted); margin: 10px 0 0; }
+
+/* ---- live catalogue passes ---------------------------------------------- */
+.pass-h {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 26px 0 8px;
+}
+.pass { max-width: 520px; }
+.pass-load, .pass-err {
+  font-size: 13px;
+  color: var(--muted);
+  padding: 12px 14px;
+  border: 1px dashed #b9b2a0;
+}
+.pass-err { color: #8a3b3b; border-color: #d3b3b3; }
+.pass-sum { font-size: 13px; color: var(--ink); margin-bottom: 9px; }
+.pass-tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+.pass-tbl th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 4px 10px 6px 0;
+  border-bottom: 1px solid var(--line, #ddd6c6);
+}
+.pass-tbl td {
+  padding: 4px 10px 4px 0;
+  border-bottom: 1px dotted #e4dfd2;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.pass-tbl tr.ok td { color: var(--ink); font-weight: 600; }
+.pass-tbl td.dim { opacity: 0.65; font-weight: 400; }
+.pass-note {
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 10px 0 0;
+  max-width: 62ch;
+}
