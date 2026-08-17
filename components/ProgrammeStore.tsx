@@ -251,6 +251,7 @@ export function ProgrammeProvider({ children }: { children: ReactNode }) {
         afterLabelKn: census ? "ನಂತರ — ಉಳಿವಿನ ಗಣತಿಯ ವೇಳೆ" : "ನಂತರ — ನೆಟ್ಟ ವೇಳೆ",
         afterDate: census?.countedOn ?? pl.plantedOn,
         afterKind: census ? "canopy" : "planted",
+        photographed: false,
       },
     } as Parcel;
   });

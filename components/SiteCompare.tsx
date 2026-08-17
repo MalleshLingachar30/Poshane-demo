@@ -30,6 +30,17 @@ export type SitePair = {
   afterLabelKn: string;
   afterDate: string;
   afterKind: "planted" | "canopy";
+  /**
+   * Set true only when photographs actually exist at
+   * /public/evidence/<locationId>-before.jpg and -after.jpg.
+   *
+   * Declared rather than detected. Asking the browser whether an image loaded
+   * is a race — the request fails during server render, before React has
+   * attached an error handler, and the frame is left showing a broken glyph.
+   * More importantly the caption differs: with photographs it can assert that
+   * both frames came from one station, and without them it must not.
+   */
+  photographed?: boolean;
 };
 
 function Schematic({ kind }: { kind: "bare" | "planted" | "canopy" }) {
@@ -98,9 +109,8 @@ function Half({ pair, side }: { pair: SitePair; side: "before" | "after" }) {
   const src = `/evidence/${pair.locationId}-${side}.jpg`;
   const kind = side === "before" ? "bare" : pair.afterKind;
 
-  if (broken) return <Schematic kind={kind} />;
+  if (!pair.photographed || broken) return <Schematic kind={kind} />;
   return (
-    // a real photograph is used the moment one is placed beside the record
     <img
       src={src}
       alt=""
@@ -156,9 +166,13 @@ export default function SiteCompare({ pair, height = 260 }: { pair: SitePair; he
       </div>
 
       <p className="cmp-meta">
-        {en
-          ? `Both frames from the same station — ${pair.station}, facing ${pair.bearing}. A comparison only means anything if the camera did not move.`
-          : `ಎರಡೂ ಚಿತ್ರಗಳು ಒಂದೇ ಸ್ಥಾನದಿಂದ — ${pair.station}, ${pair.bearing} ದಿಕ್ಕಿಗೆ. ಕ್ಯಾಮೆರಾ ಜಾಗ ಬದಲಿಸದಿದ್ದರೆ ಮಾತ್ರ ಹೋಲಿಕೆಗೆ ಅರ್ಥ.`}
+        {pair.photographed
+          ? en
+            ? `Both frames from the same station — ${pair.station}, facing ${pair.bearing}. A comparison only means anything if the camera did not move.`
+            : `ಎರಡೂ ಚಿತ್ರಗಳು ಒಂದೇ ಸ್ಥಾನದಿಂದ — ${pair.station}, ${pair.bearing} ದಿಕ್ಕಿಗೆ. ಕ್ಯಾಮೆರಾ ಜಾಗ ಬದಲಿಸದಿದ್ದರೆ ಮಾತ್ರ ಹೋಲಿಕೆಗೆ ಅರ್ಥ.`
+          : en
+            ? `These two frames are drawn, not photographed — this parcel has no station pair on file yet. The station was fixed at verification (${pair.station}, facing ${pair.bearing}) and every later visit returns to it, so the frames stack once photographs exist. The dates either side are the parcel's own.`
+            : `ಈ ಎರಡು ಚಿತ್ರಗಳು ಚಿತ್ರಿಸಿದವು, ಛಾಯಾಚಿತ್ರಗಳಲ್ಲ — ಈ ತಾಕಿಗೆ ಇನ್ನೂ ಜೋಡಿ ಇಲ್ಲ. ಪರಿಶೀಲನೆಯ ವೇಳೆ ಸ್ಥಾನ ನಿಗದಿಯಾಗಿದೆ (${pair.station}, ${pair.bearing} ದಿಕ್ಕಿಗೆ) ಮತ್ತು ಪ್ರತಿ ಭೇಟಿಯೂ ಅಲ್ಲಿಗೇ ಮರಳುತ್ತದೆ. ಎರಡೂ ಬದಿಯ ದಿನಾಂಕಗಳು ತಾಕಿನವೇ.`}
       </p>
     </div>
   );

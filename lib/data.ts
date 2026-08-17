@@ -600,6 +600,29 @@ function cadreForTaluk(taluk: string): { en: string; kn: string } {
   return POSTING.get(taluk) ?? { en: `Verification officer — ${taluk}`, kn: `ಪರಿಶೀಲನಾ ಅಧಿಕಾರಿ — ${taluk}` };
 }
 
+/**
+ * Camera stations, for the before-and-after comparison.
+ *
+ * A station has to be a thing an officer can find again in three years without
+ * the app — a survey peg, a boundary stone, a rock. "Twenty metres north of the
+ * gate" is a description, not a station, and the next officer will stand
+ * somewhere else.
+ */
+const STATIONS: [string, string][] = [
+  ["the survey peg at the north-west corner", "ವಾಯುವ್ಯ ಮೂಲೆಯ ಸರ್ವೆ ಗೂಟ"],
+  ["the boundary stone beside the cart track", "ಗಾಡಿ ದಾರಿಯ ಪಕ್ಕದ ಗಡಿ ಕಲ್ಲು"],
+  ["the rock outcrop on the eastern edge", "ಪೂರ್ವ ಅಂಚಿನ ಬಂಡೆ"],
+  ["the electricity pole at the entrance", "ಪ್ರವೇಶದ್ವಾರದ ವಿದ್ಯುತ್ ಕಂಬ"],
+  ["the old tamarind at the southern boundary", "ದಕ್ಷಿಣ ಗಡಿಯ ಹಳೆಯ ಹುಣಸೆ ಮರ"],
+  ["the tank bund at the north end", "ಉತ್ತರ ತುದಿಯ ಕೆರೆ ಏರಿ"],
+];
+
+const BEARINGS: [string, string][] = [
+  ["north-east", "ಈಶಾನ್ಯ"], ["south-east", "ಆಗ್ನೇಯ"],
+  ["north-west", "ವಾಯುವ್ಯ"], ["south-west", "ನೈಋತ್ಯ"],
+  ["north", "ಉತ್ತರ"], ["east", "ಪೂರ್ವ"],
+];
+
 function provenance(p: Parcel, i: number): Parcel {
   const r = seeded(p.id + "prov");
   const [dEn, dKn] = PROV_DEPTS[Math.floor(r() * PROV_DEPTS.length)];
@@ -614,6 +637,27 @@ function provenance(p: Parcel, i: number): Parcel {
     verifiedByKn: officer.kn,
     planApprovedOn: `${["12", "19", "26"][Math.floor(r() * 3)]} ${["Mar", "Apr", "May"][Math.floor(r() * 3)]} 2027`,
     season: "Monsoon 2027",
+    // Every parcel carries a comparison, built from dates it already holds
+    // rather than invented: the before frame is the verification visit, the
+    // after frame the survival census. Without this the wipe appeared only on
+    // a parcel created live in the session, so a component that exists on
+    // every public record was visible on none of them.
+    //
+    // Both halves render as drawn frames until a photograph is placed at
+    // /public/evidence/<location-id>-before.jpg. That is the truthful state for
+    // year-one land, and it is the reason the drawn frames were built.
+    sitePair: {
+      locationId: p.id,
+      station: STATIONS[Math.floor(r() * STATIONS.length)][0],
+      bearing: BEARINGS[Math.floor(r() * BEARINGS.length)][0],
+      beforeLabelEn: "Before — at verification",
+      beforeLabelKn: "ಮೊದಲು — ಪರಿಶೀಲನೆಯ ವೇಳೆ",
+      beforeDate: p.verifiedOn,
+      afterLabelEn: "After — at the survival census",
+      afterLabelKn: "ನಂತರ — ಉಳಿವಿನ ಗಣತಿಯ ವೇಳೆ",
+      afterDate: p.survivalCountedOn,
+      afterKind: "canopy" as const,
+    },
   };
 }
 

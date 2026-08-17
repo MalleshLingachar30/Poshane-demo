@@ -26,3 +26,16 @@ sceptical reviewer will notice.
 **And the honest interval.** A first-year photograph will show small saplings in
 bare ground, because that is what year one looks like. The comparison that
 convinces is year one against year three or four, when the canopy has closed.
+
+
+## Switching a pair on
+
+Dropping the two files here is not enough on its own. Set `photographed: true`
+on that parcel's `sitePair` as well.
+
+This is declared rather than detected on purpose. Asking the browser whether an
+image loaded is a race — the request fails during server render, before React
+has attached an error handler, and the frame is left showing a broken glyph
+instead of the drawn one. And the caption is not the same either way: with
+photographs it states that both frames came from one station, and without them
+it must not, because that would be a claim about pictures nobody has taken.
