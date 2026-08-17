@@ -8,12 +8,14 @@ import { ROLES } from "@/lib/data";
 
 const NAV = [
   { href: "/", key: "publicRecord" as const },
+  { href: "/map", key: "mapNav" as const },
   { href: "/console", key: "console" as const },
   { href: "/console/submit", key: "submitParcel" as const },
   { href: "/console/state", key: "stateView" as const },
   { href: "/tags", key: "tags" as const },
   { href: "/intake", key: "workflow" as const },
   { href: "/evidence", key: "evidenceSpec" as const },
+  { href: "/field", key: "field" as const },
 ];
 
 export default function Header() {

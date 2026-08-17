@@ -178,6 +178,8 @@ export const t = {
   tags: { en: "Tags", kn: "ಟ್ಯಾಗ್‌ಗಳು" },
   workflow: { en: "Programme workflow", kn: "ಕಾರ್ಯಕ್ರಮದ ಹಂತಗಳು" },
   evidenceSpec: { en: "Evidence", kn: "ಸಾಕ್ಷ್ಯ" },
+  mapNav: { en: "Map", kn: "ನಕ್ಷೆ" },
+  field: { en: "Field", kn: "ಕ್ಷೇತ್ರ" },
   printSheet: { en: "Print sheet", kn: "ಹಾಳೆ ಮುದ್ರಿಸಿ" },
   scanMe: { en: "Scan to see this site", kn: "ಈ ಸ್ಥಳವನ್ನು ನೋಡಲು ಸ್ಕ್ಯಾನ್ ಮಾಡಿ" },
 

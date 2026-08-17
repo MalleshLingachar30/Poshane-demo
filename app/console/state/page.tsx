@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useDemo } from "@/components/DemoContext";
 import { tr } from "@/lib/i18n";
-import { ALL_PARCELS as PARCELS, TOTAL_TALUKS, byAttention } from "@/lib/data";
+import { ALL_PARCELS as PARCELS, TOTAL_TALUKS, byAttention, placeOf } from "@/lib/data";
 import { SEED_OFFERS, SEED_VERIFICATIONS } from "@/lib/offers";
 import { buildRegister, cohorts, overlappingTaluks, STAGE_LABEL } from "@/lib/register";
 
@@ -160,9 +160,7 @@ export default function StateView() {
             <div className="grow">
               <div className="mono">{p.id}</div>
               <div className="t">
-                {en
-                  ? `${p.taluk} ${tr("taluk", lang)}, ${p.district}`
-                  : `${p.talukKn} ${tr("taluk", lang)}, ${p.districtKn}`}
+                {placeOf(p, lang, tr("taluk", lang))}
               </div>
             </div>
             <div className={`num ${p.survival < 75 ? "low" : ""}`}>{p.survival}%</div>

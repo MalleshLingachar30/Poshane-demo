@@ -7,7 +7,7 @@ import ParcelSatellite from "@/components/ParcelSatellite";
 import SiteCompare from "@/components/SiteCompare";
 import EvidencePanel from "@/components/EvidencePanel";
 import { tr } from "@/lib/i18n";
-import type { Parcel } from "@/lib/data";
+import { placeOf, type Parcel } from "@/lib/data";
 
 export default function PublicRecord({ parcel: p }: { parcel: Parcel }) {
   const { lang } = useDemo();
@@ -40,9 +40,7 @@ export default function PublicRecord({ parcel: p }: { parcel: Parcel }) {
                 margin: "2px 0",
               }}
             >
-              {en
-                ? `${p.taluk} ${tr("taluk", lang)}, ${p.district}`
-                : `${p.talukKn} ${tr("taluk", lang)}, ${p.districtKn}`}
+              {placeOf(p, lang, tr("taluk", lang))}
             </h1>
             <div style={{ fontSize: 13.5, color: "var(--muted)" }}>
               {p.areaHa.toFixed(2)} {tr("ha", lang)} · {tr("landType", lang)} ·{" "}

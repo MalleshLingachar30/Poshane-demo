@@ -5,7 +5,7 @@ import { useDemo } from "@/components/DemoContext";
 import ParcelMap from "@/components/ParcelMap";
 import EvidencePanel from "@/components/EvidencePanel";
 import { tr } from "@/lib/i18n";
-import { scopedParcels, type Parcel } from "@/lib/data";
+import { scopedParcels, type Parcel, placeOf } from "@/lib/data";
 
 export default function ConsoleRecord({ parcel: p }: { parcel: Parcel }) {
   const { lang, role } = useDemo();
@@ -74,9 +74,7 @@ export default function ConsoleRecord({ parcel: p }: { parcel: Parcel }) {
                 margin: "2px 0",
               }}
             >
-              {en
-                ? `${p.taluk} ${tr("taluk", lang)}, ${p.district}`
-                : `${p.talukKn} ${tr("taluk", lang)}, ${p.districtKn}`}
+              {placeOf(p, lang, tr("taluk", lang))}
             </h1>
             <div style={{ fontSize: 13.5, color: "var(--muted)" }}>
               {p.areaHa.toFixed(2)} {tr("ha", lang)} · {tr("plantedOn", lang)}{" "}

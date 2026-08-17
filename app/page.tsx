@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useDemo } from "@/components/DemoContext";
 import { tr } from "@/lib/i18n";
-import { ALL_PARCELS } from "@/lib/data";
+import { ALL_PARCELS, placeOf } from "@/lib/data";
 import { useOffers } from "@/components/ProgrammeStore";
 
 const LIMIT = 24;
@@ -44,6 +44,7 @@ export default function ScanEntry() {
           (!taluk || p.taluk === taluk) &&
           (!needle ||
             p.id.toLowerCase().includes(needle) ||
+            (p.village?.toLowerCase().includes(needle) ?? false) ||
             p.taluk.toLowerCase().includes(needle) ||
             p.district.toLowerCase().includes(needle)),
       )
@@ -138,9 +139,7 @@ export default function ScanEntry() {
                   )}
                 </div>
                 <div className="t">
-                  {en
-                    ? `${p.taluk} ${tr("taluk", lang)}, ${p.district}`
-                    : `${p.talukKn} ${tr("taluk", lang)}, ${p.districtKn}`}
+                  {placeOf(p, lang, tr("taluk", lang))}
                 </div>
                 <div className="s">
                   {p.areaHa.toFixed(2)} {tr("ha", lang)} ·{" "}

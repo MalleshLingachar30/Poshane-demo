@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useDemo } from "@/components/DemoContext";
 import { tr } from "@/lib/i18n";
-import { scopedParcels, byAttention, type Status } from "@/lib/data";
+import { scopedParcels, byAttention, type Status, placeOf } from "@/lib/data";
 
 const LIMIT = 20;
 
@@ -147,9 +147,7 @@ export default function Console() {
               <div className="grow">
                 <div className="mono">{p.id}</div>
                 <div className="t">
-                  {en
-                    ? `${p.taluk} ${tr("taluk", lang)}, ${p.district}`
-                    : `${p.talukKn} ${tr("taluk", lang)}, ${p.districtKn}`}
+                  {placeOf(p, lang, tr("taluk", lang))}
                 </div>
                 <div className="s">
                   {p.areaHa.toFixed(2)} {tr("ha", lang)} · {tr("countedOn", lang)}{" "}

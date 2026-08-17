@@ -1,3 +1,5 @@
+import { VILLAGES } from "./villages";
+
 export type Status = "active" | "flagged" | "rectification";
 
 export type CaptureImage = {
@@ -67,6 +69,17 @@ export type Parcel = {
   districtKn: string;
   taluk: string;
   talukKn: string;
+  /**
+   * Village, once a site is registered with one.
+   *
+   * Absent on every seeded site here: these carry a district and a taluk only,
+   * which is why the map draws them inside their taluk rather than at a point.
+   * The field app captures a village at registration, so real sites arrive with
+   * this filled and the map pins them to the village centroid instead — the
+   * only change needed is the centroid lookup.
+   */
+  village?: string;
+  villageKn?: string;
   areaHa: number;
   plantedOn: string;
   verifiedOn: string;
@@ -663,7 +676,49 @@ function provenance(p: Parcel, i: number): Parcel {
 
 const RAW_PARCELS: Parcel[] = [...PARCELS, ...GENERATED];
 assignPostings(RAW_PARCELS.map((p) => p.taluk));
-export const ALL_PARCELS: Parcel[] = RAW_PARCELS.map(provenance);
+
+/**
+ * A village for each site, from the list the programme supplied.
+ *
+ * Assigned in order within the taluk rather than at random, so a site keeps the
+ * same village across reloads — and across two people's screens in the same
+ * meeting, which is the case that would actually embarrass anyone.
+ *
+ * A village names a site; it does not locate it. There is still no coordinate
+ * in the register, so the map continues to seat a site inside its taluk and
+ * says as much on screen.
+ */
+function withVillages(list: Parcel[]): Parcel[] {
+  const used = new Map<string, number>();
+  return list.map((p) => {
+    const names = VILLAGES[p.taluk];
+    if (!names?.length) return p;
+    const i = used.get(p.taluk) ?? 0;
+    used.set(p.taluk, i + 1);
+    return { ...p, village: names[i % names.length] };
+  });
+}
+
+export const ALL_PARCELS: Parcel[] = withVillages(RAW_PARCELS.map(provenance));
+
+/**
+ * Where a site is, written the same way on every screen.
+ *
+ * This was five separate template literals in five files, which is how a
+ * village ends up on the public record and missing from the console — and a
+ * committee member who sees a place on one screen and a code on the next
+ * reasonably wonders which is the real system. One function, one form of
+ * words: village, taluk, district.
+ *
+ * The village falls away silently where a site has none, so this stays correct
+ * for sites registered before villages were captured.
+ */
+export function placeOf(p: Parcel, lang: "en" | "kn", talukWord: string): string {
+  const village = lang === "en" ? p.village : (p.villageKn ?? p.village);
+  const taluk = lang === "en" ? p.taluk : p.talukKn;
+  const district = lang === "en" ? p.district : p.districtKn;
+  return `${village ? `${village}, ` : ""}${taluk} ${talukWord}, ${district}`;
+}
 
 export const TOTAL_TALUKS = new Set(
   ALL_PARCELS.map((p) => `${p.district}/${p.taluk}`),

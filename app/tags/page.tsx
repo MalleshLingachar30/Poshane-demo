@@ -120,7 +120,7 @@ export default function Tags() {
             )}
             <div className="tag-id">{p.id}</div>
             <div className="tag-place">
-              {en ? `${p.taluk}, ${p.district}` : `${p.talukKn}, ${p.districtKn}`}
+              {en ? `${p.village ? `${p.village}, ` : ""}${p.taluk}, ${p.district}` : `${p.villageKn ?? p.village ? `${p.villageKn ?? p.village}, ` : ""}${p.talukKn}, ${p.districtKn}`}
             </div>
             <div className="tag-cta">{tr("scanMe", lang)}</div>
           </div>
