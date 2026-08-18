@@ -14,14 +14,33 @@ export default function PublicRecord({ parcel: p }: { parcel: Parcel }) {
   const { lang } = useDemo();
   const en = lang === "en";
 
-  // Read from the URL rather than passed down, so a link shared from the map
-  // still returns the recipient to the map.
+  /**
+   * Where the visitor came from, so back returns there.
+   *
+   * Two sources, checked in that order. The query string is authoritative and
+   * survives a shared link, so someone sent a URL from the map is returned to
+   * the map. sessionStorage is the fallback for a visitor who reached this
+   * page some other way after using the map — arriving from the tag list, say,
+   * having browsed the map earlier in the same session.
+   */
   const [from, setFrom] = useState<string | null>(null);
   const [taluk, setTaluk] = useState<string | null>(null);
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
-    setFrom(q.get("from"));
-    setTaluk(q.get("taluk"));
+    const qFrom = q.get("from");
+    const qTaluk = q.get("taluk");
+    if (qFrom === "map") {
+      setFrom("map");
+      setTaluk(qTaluk);
+      return;
+    }
+    try {
+      const stored = sessionStorage.getItem("poshane.map.taluk");
+      if (stored) {
+        setFrom("map");
+        setTaluk(stored);
+      }
+    } catch {}
   }, []);
 
   return (

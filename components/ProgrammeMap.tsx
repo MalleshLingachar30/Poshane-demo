@@ -45,6 +45,15 @@ export default function ProgrammeMap() {
    *
    * replaceState rather than push: a visitor clicking six pins should not have
    * to press back six times to leave the map.
+   *
+   * The state object is carried through rather than replaced with null. Next's
+   * router keeps its own object on each history entry, and passing null wipes
+   * it — the entry survives but the router no longer recognises it, so going
+   * back lands somewhere unintended. Preserving it costs nothing and is the
+   * difference between the back button working and not.
+   *
+   * The taluk is also written to sessionStorage, so the record page can offer
+   * a way back without depending on the query string surviving the trip.
    */
   const [sel, setSelState] = useState<string | null>(null);
 
@@ -56,7 +65,11 @@ export default function ProgrammeMap() {
   const setSel = (name: string | null) => {
     setSelState(name);
     const url = name ? `/map?taluk=${encodeURIComponent(name)}` : "/map";
-    window.history.replaceState(null, "", url);
+    window.history.replaceState(window.history.state, "", url);
+    try {
+      if (name) sessionStorage.setItem("poshane.map.taluk", name);
+      else sessionStorage.removeItem("poshane.map.taluk");
+    } catch {}
   };
   const [mode, setMode] = useState<Mode>("parcels");
   const [hover, setHover] = useState<Parcel | null>(null);
