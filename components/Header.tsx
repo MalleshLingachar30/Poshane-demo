@@ -15,14 +15,17 @@ const NAV = [
   { href: "/tags", key: "tags" as const },
   { href: "/intake", key: "workflow" as const },
   { href: "/evidence", key: "evidenceSpec" as const },
-  { href: "/field", key: "field" as const },
 ];
 
 export default function Header() {
   const { lang, setLang, role, setRoleKey } = useDemo();
   const path = usePathname();
   const en = lang === "en";
-  const isPublic = path === "/" || path.startsWith("/p/");
+  // Screens a citizen reaches by scanning a tag, with no sign-in. The role
+  // picker has no meaning on them, and showing "Signed in as State command"
+  // beside a page that says it is open to anyone is a plain contradiction.
+  const isPublic =
+    path === "/" || path.startsWith("/p/") || path === "/map" || path === "/tags";
   const isIntake = path.startsWith("/intake");
   const nav = NAV.filter(
     (n) => n.href !== "/console/state" || role.level === "state",

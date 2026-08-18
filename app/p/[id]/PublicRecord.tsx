@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useDemo } from "@/components/DemoContext";
 import ParcelMap from "@/components/ParcelMap";
 import ParcelSatellite from "@/components/ParcelSatellite";
@@ -13,10 +14,29 @@ export default function PublicRecord({ parcel: p }: { parcel: Parcel }) {
   const { lang } = useDemo();
   const en = lang === "en";
 
+  // Read from the URL rather than passed down, so a link shared from the map
+  // still returns the recipient to the map.
+  const [from, setFrom] = useState<string | null>(null);
+  const [taluk, setTaluk] = useState<string | null>(null);
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    setFrom(q.get("from"));
+    setTaluk(q.get("taluk"));
+  }, []);
+
   return (
     <main>
-      <Link href="/" className="mono" style={{ textDecoration: "none" }}>
-        ← {tr("back", lang)}
+      {/* Back should return to wherever the visitor came from. Arriving from
+          the map and being returned to the public record means finding the
+          taluk again for every site you want to look at. */}
+      <Link
+        href={from === "map" ? `/map${taluk ? `?taluk=${encodeURIComponent(taluk)}` : ""}` : "/"}
+        className="mono"
+        style={{ textDecoration: "none" }}
+      >
+        ← {from === "map"
+          ? (lang === "en" ? `Back to ${taluk || "the map"}` : `${taluk || "ನಕ್ಷೆ"}ಗೆ ಹಿಂತಿರುಗಿ`)
+          : tr("back", lang)}
       </Link>
 
       <div className="card" style={{ marginTop: 14 }}>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDemo } from "./DemoContext";
 import { ALL_PARCELS, type Parcel } from "@/lib/data";
 import { DISTRICT_SHAPES, TALUK_SHAPES, TALUK_SLOTS, KARNATAKA_OUTLINE, MAP_W, MAP_H } from "@/lib/karnataka";
@@ -34,7 +34,30 @@ type Mode = "parcels" | "survival";
 export default function ProgrammeMap() {
   const { lang } = useDemo();
   const en = lang === "en";
-  const [sel, setSel] = useState<string | null>(null);
+  /**
+   * The selected taluk is held in the URL, not only in state.
+   *
+   * Opening a site and pressing back used to land on the public record, because
+   * /map had no memory of what was selected — so checking two sites in the same
+   * taluk meant finding it on the map again each time. Writing the selection
+   * into the query string means the browser's own back button returns to
+   * exactly the view the visitor left.
+   *
+   * replaceState rather than push: a visitor clicking six pins should not have
+   * to press back six times to leave the map.
+   */
+  const [sel, setSelState] = useState<string | null>(null);
+
+  useEffect(() => {
+    const t = new URLSearchParams(window.location.search).get("taluk");
+    if (t) setSelState(t);
+  }, []);
+
+  const setSel = (name: string | null) => {
+    setSelState(name);
+    const url = name ? `/map?taluk=${encodeURIComponent(name)}` : "/map";
+    window.history.replaceState(null, "", url);
+  };
   const [mode, setMode] = useState<Mode>("parcels");
   const [hover, setHover] = useState<Parcel | null>(null);
 
@@ -324,18 +347,45 @@ export default function ProgrammeMap() {
                   </p>
 
                   <h3>{en ? "Sites" : "ಸ್ಥಳಗಳು"}</h3>
+                  {/* The register holds no coordinate, so this cannot be a pin
+                      dropped on a parcel — that would be a claim about ground
+                      nobody has walked. What it can honestly be is a search for
+                      the village itself, which is a real place a viewer can go
+                      and look at. The link says which of the two it is. */}
                   <p className="pmap-hint" style={{ marginBottom: 8 }}>
                     {[...new Set(selected.map((p) => p.village).filter(Boolean))].join(" · ")}
+                  </p>
+                  <p className="pmap-hint" style={{ marginBottom: 8 }}>
+                    {en
+                      ? "The village link opens that village on Google Maps. It locates the village, not the site — the register holds no coordinate for the site itself, and a walked boundary is what will place it."
+                      : "ಗ್ರಾಮದ ಕೊಂಡಿ ಆ ಗ್ರಾಮವನ್ನು ಗೂಗಲ್ ನಕ್ಷೆಯಲ್ಲಿ ತೆರೆಯುತ್ತದೆ. ಇದು ಗ್ರಾಮವನ್ನು ತೋರಿಸುತ್ತದೆ, ತಾಕನ್ನಲ್ಲ."}
                   </p>
                   <ul className="pmap-parcels">
                     {selected.map((p) => (
                       <li key={p.id}>
-                        <Link href={`/p/${p.id}`} className={`st-${p.status}`}>
-                          <span className="pvil">{p.village ?? "—"}</span>
-                          <span className="pt mono">{p.id}</span>
-                          <span className="pa">{p.areaHa} ha · {p.saplings.toLocaleString("en-IN")}</span>
-                          <span className="pv">{p.survival}%</span>
-                        </Link>
+                        <div className={`sitrow st-${p.status}`}>
+                          <Link href={`/p/${p.id}?from=map&taluk=${encodeURIComponent(sel)}`}>
+                            <span className="pvil">{p.village ?? "—"}</span>
+                            <span className="pt mono">{p.id}</span>
+                            <span className="pa">{p.areaHa} ha · {p.saplings.toLocaleString("en-IN")}</span>
+                            <span className="pv">{p.survival}%</span>
+                          </Link>
+                          {p.village && (
+                            <a
+                              className="vmap"
+                              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                                `${p.village}, ${p.taluk}, ${p.district}, Karnataka`,
+                              )}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              title={en
+                                ? `Find ${p.village} village on Google Maps. This locates the village, not the parcel — the register holds no coordinate for the site itself.`
+                                : `${p.village} ಗ್ರಾಮವನ್ನು ಗೂಗಲ್ ನಕ್ಷೆಯಲ್ಲಿ ನೋಡಿ. ಇದು ಗ್ರಾಮವನ್ನು ತೋರಿಸುತ್ತದೆ, ತಾಕನ್ನಲ್ಲ.`}
+                            >
+                              {en ? "village ↗" : "ಗ್ರಾಮ ↗"}
+                            </a>
+                          )}
+                        </div>
                       </li>
                     ))}
                   </ul>
